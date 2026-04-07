@@ -1,0 +1,191 @@
+@import "../../styles/variables";
+
+// Mixins
+@mixin card-hover-effect {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-color: $hover-border-color;
+}
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// Main Styles
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    .dashboard-title {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: $text-color;
+    }
+
+    .dashboard-subtitle {
+      color: $secondary-text;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .dashboard-controls {
+      @include flex-center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+
+      .search-container {
+        position: relative;
+        max-width: 400px;
+        width: 100%;
+
+        .search-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: $secondary-text;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 10px 15px 10px 40px;
+          border: 1px solid #ddd;
+          border-radius: 25px;
+          font-size: 1rem;
+          transition: all 0.3s;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+          }
+        }
+      }
+
+      .favorites-toggle {
+        padding: 10px 15px;
+        background: $light-bg;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        @include flex-center;
+        gap: 5px;
+
+        &:hover {
+          background: darken($light-bg, 5%);
+        }
+
+        &.active {
+          background: $active-favorite-bg;
+          border-color: $active-favorite-border;
+        }
+      }
+    }
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: lighten($secondary-text, 10%);
+    font-style: italic;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+
+    .dashboard-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid $border-color;
+      position: relative;
+      overflow: hidden;
+
+      &:hover {
+        @include card-hover-effect;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        .dashboard-card-icon {
+          color: $primary-color;
+          margin-bottom: 1.5rem;
+          @include flex-center;
+          flex: 1;
+        }
+
+        .favorite-button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 5px;
+          color: $favorite-color;
+          font-size: 1.2rem;
+
+          &:hover {
+            color: $favorite-hover;
+          }
+
+          .favorite-icon {
+            transition: all 0.2s;
+          }
+        }
+      }
+
+      .dashboard-card-title {
+        margin: 0;
+        color: $text-color;
+        font-size: 20px;
+      }
+
+      .favorite-badge {
+        position: absolute;
+        top: 10px;
+        right: -30px;
+        background: $favorite-color;
+        color: darken($text-color, 5%);
+        padding: 3px 30px;
+        font-size: 0.7rem;
+        transform: rotate(45deg);
+        width: 100px;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  }
+
+  .dashboard-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
