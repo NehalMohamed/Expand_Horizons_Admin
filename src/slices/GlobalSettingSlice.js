@@ -29,7 +29,7 @@ export const Get_Currencies = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.post(
-        `/Get_Currencies`
+        `/TravelAdmin/Get_Currencies`,
         // {},
         // getAuthHeaders(false)
       );
@@ -37,7 +37,7 @@ export const Get_Currencies = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 //Get_Currencies
 export const Get_Languages = createAsyncThunk(
@@ -45,7 +45,7 @@ export const Get_Languages = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.post(
-        `/Get_Languages`
+        `/TravelAdmin/Get_Languages`,
         // {},
         // getAuthHeaders(false)
       );
@@ -53,7 +53,7 @@ export const Get_Languages = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 const GlobalSettingSlice = createSlice({
   name: "GlobalSetting",

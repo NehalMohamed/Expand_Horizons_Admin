@@ -29,7 +29,7 @@ export const GetAllBooking = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await api.post(
-        `/GetAllBooking`,
+        `/TravelAdmin/GetAllBooking`,
         formData
         //getAuthHeaders(false)
       );

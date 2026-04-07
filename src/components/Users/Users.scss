@@ -1,0 +1,98 @@
+@import "../../styles/variables";
+// $primary-color: #542d72;
+// $secondary-color: lighten($primary-color, 20%);
+// $light-bg: lighten($primary-color, 60%);
+
+// Users Page Styles
+.users-page {
+  padding: 2rem 0;
+
+  .page-title {
+    color: $primary-color;
+    margin-bottom: 2rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .users-table {
+    th {
+      background-color: #f1e6fb;
+      color: $primary-color;
+    }
+
+    .role-badge {
+      text-transform: capitalize;
+      font-weight: 500;
+
+      &.role-admin {
+        background-color: darken($primary-color, 10%);
+      }
+
+      &.role-editor {
+        background-color: $secondary-color;
+      }
+
+      &.role-user {
+        background-color: lighten($primary-color, 30%);
+        color: #333;
+      }
+    }
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: $primary-color;
+    font-weight: 500;
+    background-color: $light-bg;
+    border-radius: 0.5rem;
+  }
+}
+
+.user-profile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: #f5f6fa;
+  // min-height: 100vh;
+
+  .user-card {
+    display: flex;
+    flex-direction: row;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    width: 100%;
+    justify-content: space-evenly;
+
+    .avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 2rem;
+      border: 3px solid #3498db;
+    }
+
+    .user-info {
+      h2 {
+        margin: 0 0 0.5rem;
+        color: $secondary-color;
+      }
+
+      p {
+        margin: 0.3rem 0;
+        color: #555;
+        .icon {
+          color: $dark-color;
+          margin: 0 2px;
+        }
+        strong {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}

@@ -33,7 +33,7 @@ export const GetDestination_Mains = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetDestinationMain?leaf=` + leaf
+        `/TravelAdmin/GetDestinationMain?leaf=` + leaf
         //getAuthHeaders(false)
       );
       return response.data;
@@ -53,7 +53,7 @@ export const GetDestinations = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetDestinationWithTranslations`,
+        `/TravelAdmin/GetDestinationWithTranslations`,
         formData
         // getAuthHeaders(false)
       );
@@ -75,7 +75,7 @@ export const SaveMainDestination = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveMainDestination`,
+        `/TravelAdmin/SaveMainDestination`,
         formData
         //getAuthHeaders(false)
       );
@@ -97,7 +97,7 @@ export const saveDestinationImage = createAsyncThunk(
       //   getAuthHeaders(true)
       // );
       const response = await api.post(
-        `/saveDestinationImage`,
+        `/TravelAdmin/saveDestinationImage`,
         formData,
         { isFormData: true }
         //getAuthHeaders(true)
@@ -119,7 +119,7 @@ export const SaveDestinationTranslations = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveDestinationTranslations`,
+        `/TravelAdmin/SaveDestinationTranslations`,
         formData
         //getAuthHeaders(false)
       );
@@ -139,7 +139,7 @@ export const GetImgsByDestination = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetImgsByDestination?destination_id=` + destination_id
+        `/TravelAdmin/GetImgsByDestination?destination_id=` + destination_id
         // {},
         // getAuthHeaders(false)
       );
@@ -161,7 +161,7 @@ export const UpdateDestinationImage = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/UpdateDestinationImage`,
+        `/TravelAdmin/UpdateDestinationImage`,
         formData
         //getAuthHeaders(false)
       );

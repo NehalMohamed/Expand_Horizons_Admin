@@ -37,7 +37,7 @@ export const GetTrip_Mains = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetTrip_Mains?destination_id=` +
+        `/TravelAdmin/GetTrip_Mains?destination_id=` +
           data.destination_id +
           "&&trip_type=" +
           data.trip_type
@@ -63,7 +63,7 @@ export const GetTripCategories = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetTripCategories`
+        `/TravelAdmin/GetTripCategories`
         // {},
         // getAuthHeaders(false)
       );
@@ -84,7 +84,7 @@ export const SaveMainTrip = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveMainTrip`,
+        `/TravelAdmin/SaveMainTrip`,
         formData
         //getAuthHeaders(false)
       );
@@ -106,7 +106,7 @@ export const GetTripTranslationGrp = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetTripTranslationGrp?trip_id=` + trip_id
+        `/TravelAdmin/GetTripTranslationGrp?trip_id=` + trip_id
         // {},
         // getAuthHeaders(false)
       );
@@ -127,7 +127,7 @@ export const GetTrip_Prices = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetTrip_Prices?trip_id=` + trip_id
+        `/TravelAdmin/GetTrip_Prices?trip_id=` + trip_id
         // {},
         // getAuthHeaders(false)
       );
@@ -145,7 +145,7 @@ export const GetTrip_ChildPolicy = createAsyncThunk(
   async (trip_id, thunkAPI) => {
     try {
       const response = await api.post(
-        `/GetTrip_ChildPolicy?trip_id=` + trip_id
+        `/TravelAdmin/GetTrip_ChildPolicy?trip_id=` + trip_id
         // {},
         // getAuthHeaders(false)
       );
@@ -167,7 +167,7 @@ export const SaveTripTranslation = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveTripTranslation`,
+        `/TravelAdmin/SaveTripTranslation`,
         formData
         //getAuthHeaders(false)
       );
@@ -189,7 +189,7 @@ export const SaveTripPrices = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveTripPrices`,
+        `/TravelAdmin/SaveTripPrices`,
         formData
         //getAuthHeaders(false)
       );
@@ -206,7 +206,7 @@ export const SaveTripChildPolicy = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await api.post(
-        `/SaveTripChildPolicy`,
+        `/TravelAdmin/SaveTripChildPolicy`,
         formData
         // getAuthHeaders(false)
       );
@@ -228,7 +228,7 @@ export const SaveMainTripPickups = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveMainTripPickups`,
+        `/TravelAdmin/SaveMainTripPickups`,
         formData
         // getAuthHeaders(false)
       );
@@ -250,7 +250,7 @@ export const SaveTripPickupsTranslations = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveTripPickupsTranslations`,
+        `/TravelAdmin/SaveTripPickupsTranslations`,
         formData
         //getAuthHeaders(false)
       );
@@ -271,7 +271,7 @@ export const GetPickupsAllForTrip = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetPickupsAllForTrip`,
+        `/TravelAdmin/GetPickupsAllForTrip`,
         formData
         //getAuthHeaders(false)
       );
@@ -293,7 +293,7 @@ export const GetImgsByTrip = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetImgsByTrip?trip_id=` + trip_id
+        `/TravelAdmin/GetImgsByTrip?trip_id=` + trip_id
         // {},
         // getAuthHeaders(false)
       );
@@ -315,7 +315,7 @@ export const SaveTripImage = createAsyncThunk(
       //   getAuthHeaders(true)
       // );
       const response = await api.post(
-        `/SaveTripImage`,
+        `/TravelAdmin/SaveTripImage`,
         formData,
         { isFormData: true }
         // getAuthHeaders(true)
@@ -338,7 +338,7 @@ export const UpdateTripImage = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/UpdateTripImage`,
+        `/TravelAdmin/UpdateTripImage`,
         formData
         //getAuthHeaders(false)
       );
@@ -359,7 +359,7 @@ export const SaveTransferCategory = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveTransferCategory`,
+        `/TravelAdmin/SaveTransferCategory`,
         formData
         //getAuthHeaders(false)
       );
@@ -381,7 +381,7 @@ export const GetTransfer_Categories = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetTransfer_Categories`,
+        `/TravelAdmin/GetTransfer_Categories`,
         formData
         //getAuthHeaders(false)
       );

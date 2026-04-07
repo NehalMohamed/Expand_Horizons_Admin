@@ -34,7 +34,7 @@ export const GetFacilityWithTranslation = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetFacilityWithTranslation`
+        `/TravelAdmin/GetFacilityWithTranslation`
         // {},
         // getAuthHeaders(false)
       );
@@ -55,7 +55,7 @@ export const SaveFacilityTranslation = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveFacilityTranslation`,
+        `/TravelAdmin/SaveFacilityTranslation`,
         formData
         // getAuthHeaders(false)
       );
@@ -77,7 +77,7 @@ export const SaveMainFacility = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/SaveMainFacility`,
+        `/TravelAdmin/SaveMainFacility`,
         formData
         // getAuthHeaders(false)
       );
@@ -99,7 +99,7 @@ export const GetFacilityAllWithSelect = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/GetFacilityAllWithSelect?trip_id=` + trip_id
+        `/TravelAdmin/GetFacilityAllWithSelect?trip_id=` + trip_id
         // {},
         // getAuthHeaders(false)
       );
@@ -121,7 +121,7 @@ export const AssignFacilityToTrip = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/AssignFacilityToTrip`,
+        `/TravelAdmin/AssignFacilityToTrip`,
         formData
         //getAuthHeaders(false)
       );
