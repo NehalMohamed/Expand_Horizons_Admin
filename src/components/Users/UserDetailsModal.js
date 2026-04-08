@@ -29,38 +29,50 @@ function UserDetailsModal({ show, onHide, client_id }) {
       </Modal.Header>
       <Modal.Body>
         <div className="user-profile">
-          <div className="user-card">
-            <img
-              className="avatar"
-              src={profileImage || "images/no-image.png"}
-              alt={`${profileData?.client_name}'s avatar`}
-            />
-            <div className="user-info">
-              <h2>{profileData?.client_name}</h2>
-              <p>
-                {/* <FiMail className="icon"/> */}
-                <strong>Email:</strong> {profileData?.client_email || "No data"}
-              </p>
-              <p>
-                {" "}
-                {/* <FaIdCard className="icon"/> */}
-                <strong>Address:</strong> {profileData?.address || "No data"}
-              </p>
-              <p>
-                {/* <FiPhone className="icon"/> */}
-                <strong>Phone:</strong> {profileData?.phone_number || "No data"}
-              </p>
-              <p>
-                {/* <FiUser className="icon"/> */}
-                <strong>gender:</strong> {profileData?.gender || "No data"}
-              </p>
-              <p>
-                {/* <FiGift /> */}
-                <strong>BirthDay:</strong>{" "}
-                {profileData?.client_birthdayStr || "No data"}
-              </p>
+          {profileData && Object.keys(profileData).length > 0 ? (
+            <div className="user-card">
+              <img
+                className="avatar"
+                src={
+                  profileImage !== null && profileImage.trim() !== ""
+                    ? profileImage
+                    : "images/no-image.png"
+                }
+                alt={`${profileData?.client_name}'s avatar`}
+              />
+              <div className="user-info">
+                <h2>{profileData?.client_name}</h2>
+                <p>
+                  {/* <FiMail className="icon"/> */}
+                  <strong>Email:</strong>{" "}
+                  {profileData?.client_email || "No data"}
+                </p>
+                <p>
+                  {" "}
+                  {/* <FaIdCard className="icon"/> */}
+                  <strong>Address:</strong> {profileData?.address || "No data"}
+                </p>
+                <p>
+                  {/* <FiPhone className="icon"/> */}
+                  <strong>Phone:</strong>{" "}
+                  {profileData?.phone_number || "No data"}
+                </p>
+                <p>
+                  {/* <FiUser className="icon"/> */}
+                  <strong>gender:</strong> {profileData?.gender || "No data"}
+                </p>
+                <p>
+                  {/* <FiGift /> */}
+                  <strong>BirthDay:</strong>{" "}
+                  {profileData?.client_birthdayStr || "No data"}
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="centerSection">
+              <p>No Profile for this user</p>
+            </div>
+          )}
         </div>
       </Modal.Body>
     </Modal>
