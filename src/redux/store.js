@@ -7,6 +7,7 @@ import BookingReducer from "../slices/BookingSlice";
 import GlobalSettingReducer from "../slices/GlobalSettingSlice";
 import profileReducer from "../slices/profileSlice";
 import usersReducer from "../slices/usersSlice";
+import exchangeReducer from "../slices/exchangeSlice";
 export const store = configureStore({
   reducer: {
     destinations: destinationReducer,
@@ -15,6 +16,7 @@ export const store = configureStore({
     facility: facilityReducer,
     booking: BookingReducer,
     GlobalSetting: GlobalSettingReducer,
+    exchange: exchangeReducer,
     users: usersReducer,
     profile: profileReducer,
   },

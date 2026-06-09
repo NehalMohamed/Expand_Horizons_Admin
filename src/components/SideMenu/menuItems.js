@@ -55,6 +55,14 @@ export const allMenuItems = [
     withSub: false,
   },
   {
+    id: "exchangeRates",
+    title: "Exchange Rates",
+    icon: "FaDollarSign",
+    path: "/exchange-rates",
+    roles: ["Admin", "manager"],
+    withSub: false,
+  },
+  {
     id: "Users",
     title: "Users",
     icon: "FiUsers",

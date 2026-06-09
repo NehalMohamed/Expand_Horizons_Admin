@@ -24,6 +24,7 @@ import { setNavigator } from "./helper/navigate";
 import NavigationSetter from "./helper/NavigationSetter";
 import BookingGrid from "./components/Booking/BookingGrid";
 import UsersPage from "./components/Users/UsersPage";
+import ExchangeRates from "./components/GlobalSetting/ExchangeRates";
 export default function App() {
   // const navigate = useNavigate();
 
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/trips/facility" element={<TripFacility />} />
             <Route path="/facility" element={<Facility />} />
             <Route path="/Booking" element={<BookingGrid />} />
+            <Route path="/exchange-rates" element={<ExchangeRates />} />
             {/* <Route path="/transfer" element={<CategorySetting />} /> */}
             <Route path="/users" element={<UsersPage />} />
           </Route>
