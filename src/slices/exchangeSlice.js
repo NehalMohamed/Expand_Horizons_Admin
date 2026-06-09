@@ -34,6 +34,20 @@ export const SaveExchangeRate = createAsyncThunk(
   }
 );
 
+export const GetCompanySetting = createAsyncThunk(
+  "Exchange/GetCompanySetting",
+  async (companyId = 1, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/TravelAdmin/Get_CompanySetting?company_id=${companyId}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const exchangeSlice = createSlice({
   name: "exchange",
   initialState: {
@@ -42,6 +56,7 @@ const exchangeSlice = createSlice({
     saving: false,
     error: null,
     saveResult: null,
+    companyCurrencyCode: "EUR",
   },
   reducers: {
     updateRate(state, action) {
@@ -92,6 +107,17 @@ const exchangeSlice = createSlice({
         state.saving = false;
         state.error =
           action.payload?.msg || action.payload || "Unable to save exchange rates.";
+      })
+      .addCase(GetCompanySetting.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(GetCompanySetting.fulfilled, (state, action) => {
+        state.companyCurrencyCode = action.payload?.currency_code || "EUR";
+      })
+      .addCase(GetCompanySetting.rejected, (state, action) => {
+        state.error =
+          action.payload?.msg || action.payload ||
+          "Unable to load company settings.";
       });
   },
 });

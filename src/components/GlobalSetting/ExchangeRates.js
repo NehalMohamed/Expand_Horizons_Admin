@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   GetExchangeRates,
   SaveExchangeRate,
+  GetCompanySetting,
   updateRate,
   clearExchangeMessage,
 } from "../../slices/exchangeSlice";
@@ -10,15 +11,24 @@ import "./ExchangeRates.scss";
 
 function ExchangeRates() {
   const dispatch = useDispatch();
-  const { rates, loading, saving, error, saveResult } = useSelector(
-    (state) => state.exchange,
-  );
+  const {
+    rates,
+    loading,
+    saving,
+    error,
+    saveResult,
+    companyCurrencyCode,
+  } = useSelector((state) => state.exchange);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [selectedDate, setSelectedDate] = useState(today);
   const [message, setMessage] = useState(null);
 
   const isToday = selectedDate === today;
+
+  useEffect(() => {
+    dispatch(GetCompanySetting(1));
+  }, [dispatch]);
 
   useEffect(() => {
     setMessage(null);
@@ -78,7 +88,7 @@ function ExchangeRates() {
         <div className="exchange-header">
           <div className="exchange-field">
             <label>Currency</label>
-            <input value="EUR" readOnly />
+            <input value={companyCurrencyCode || "EUR"} readOnly />
           </div>
           <div className="exchange-field">
             <label>Date</label>
@@ -99,7 +109,7 @@ function ExchangeRates() {
                 <tr>
                   <th>Currency Code</th>
                   <th>Currency Name</th>
-                  <th>Rate Against USD</th>
+                  <th>Rate Against {companyCurrencyCode || "EUR"}</th>
                 </tr>
               </thead>
               <tbody>
