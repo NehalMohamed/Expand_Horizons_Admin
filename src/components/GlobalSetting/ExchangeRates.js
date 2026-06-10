@@ -24,7 +24,7 @@ function ExchangeRates() {
   const [selectedDate, setSelectedDate] = useState(today);
   const [message, setMessage] = useState(null);
 
-  const isToday = selectedDate === today;
+  const isNotPastDate = selectedDate >= today;
 
   useEffect(() => {
     dispatch(GetCompanySetting(1));
@@ -45,19 +45,24 @@ function ExchangeRates() {
   }, [error, saveResult]);
 
   const handleRateChange = (currency_code, value) => {
-    if (!isToday) return;
+    if (!isNotPastDate) return;
     dispatch(updateRate({ currency_code, rate: value }));
   };
 
   const handleSave = async () => {
-    if (!isToday) return;
+    if (!isNotPastDate) return;
     setMessage(null);
+    dispatch(clearExchangeMessage());
+    
     const resultAction = await dispatch(
       SaveExchangeRate({ rates, date: selectedDate }),
     );
 
     if (SaveExchangeRate.fulfilled.match(resultAction)) {
-      dispatch(GetExchangeRates(selectedDate));
+      // Small delay to ensure backend processing is complete
+      setTimeout(() => {
+        dispatch(GetExchangeRates(selectedDate));
+      }, 300);
     }
   };
 
@@ -76,7 +81,7 @@ function ExchangeRates() {
           <button
             type="button"
             className="btn green-btn"
-            disabled={!isToday || rates.length === 0 || saving}
+            disabled={!isNotPastDate || rates.length === 0 || saving}
             onClick={handleSave}
           >
             {saving ? "Saving..." : "Save Rates"}
@@ -125,7 +130,7 @@ function ExchangeRates() {
                       <td>{item.currency_code}</td>
                       <td>{item.currency_name}</td>
                       <td>
-                        {isToday ? (
+                        {isNotPastDate ? (
                           <input
                             type="number"
                             min="0"
