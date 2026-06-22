@@ -8,6 +8,7 @@ import GlobalSettingReducer from "../slices/GlobalSettingSlice";
 import profileReducer from "../slices/profileSlice";
 import usersReducer from "../slices/usersSlice";
 import exchangeReducer from "../slices/exchangeSlice";
+import transferImageReducer from "../slices/transferImageSlice";
 export const store = configureStore({
   reducer: {
     destinations: destinationReducer,
@@ -19,6 +20,7 @@ export const store = configureStore({
     exchange: exchangeReducer,
     users: usersReducer,
     profile: profileReducer,
+    transferImage: transferImageReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

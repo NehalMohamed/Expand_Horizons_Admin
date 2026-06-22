@@ -14,6 +14,7 @@ import TripPrices from "./components/Trips/TripPrices";
 import TripPickUps from "./components/Trips/TripPickUps";
 import TripImages from "./components/Trips/TripImages";
 import DestinationImages from "./components/Destinations/DestinationImages";
+import TransferCategoryImages from "./components/Transfer/TransferCategoryImages";
 import Facility from "./components/Facilities/Facility";
 import TripFacility from "./components/Trips/TripFacility";
 import CategorySetting from "./components/Transfer/CategorySetting";
@@ -57,7 +58,8 @@ export default function App() {
             <Route path="/facility" element={<Facility />} />
             <Route path="/Booking" element={<BookingGrid />} />
             <Route path="/exchange-rates" element={<ExchangeRates />} />
-            {/* <Route path="/transfer" element={<CategorySetting />} /> */}
+            <Route path="/transfer" element={<CategorySetting />} /> 
+            <Route path="/transfer/images" element={<TransferCategoryImages />} />
             <Route path="/users" element={<UsersPage />} />
           </Route>
         </Route>

@@ -38,6 +38,14 @@ export const allMenuItems = [
     roles: ["Admin", "manager", "editor"],
     withSub: true,
   },
+  {    
+    id: "transfer",
+    title: "Transfer Category",
+    icon: "FaCar", 
+    path: "/transfer",
+    roles: ["Admin", "manager", "sales"],
+    withSub: true, 
+  },
   {
     id: "facility",
     title: "Facility Setting",
@@ -96,6 +104,14 @@ export const SubMenuItems = [
     icon: "FaFileImage",
     path: "/trips/images",
     roles: ["Admin", "manager"],
+  },
+  {
+    id: "transferImgs",
+    parentId: "transfer",
+    title: "Images",
+    icon: "FaFileImage",
+    path: "/transfer/images",
+    roles: ["Admin", "manager", "sales"],
   },
   {
     id: "tripsTrans",
