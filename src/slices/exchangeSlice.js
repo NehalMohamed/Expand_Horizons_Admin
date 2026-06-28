@@ -1,5 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../api/axios";
+import axios from "axios";
+
+const BASE_URL = process.env.REACT_APP_API_URL;
+
+const NonAuthHeaders = () => {
+  let lang = localStorage.getItem("lang");
+  return {
+    "Accept-Language": lang,
+  };
+};
 
 export const GetExchangeRates = createAsyncThunk(
   "Exchange/GetExchangeRates",
@@ -38,8 +48,10 @@ export const GetCompanySetting = createAsyncThunk(
   "Exchange/GetCompanySetting",
   async (companyId = 1, { rejectWithValue }) => {
     try {
-      const response = await api.post(
-        `/TravelAdmin/Get_CompanySetting?company_id=${companyId}`
+      const response = await axios.post(
+        `${BASE_URL}/TravelAdmin/Get_CompanySetting?company_id=${companyId}`, 
+        {}, 
+        { headers: NonAuthHeaders() }
       );
       return response.data;
     } catch (error) {
