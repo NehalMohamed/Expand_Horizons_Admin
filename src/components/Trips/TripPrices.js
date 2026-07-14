@@ -1,3 +1,34 @@
+/**
+ * TripPrices Component
+ *
+ * Purpose:
+ * - Manages all pricing records assigned to a selected trip.
+ * - Allows administrators to create, update, and delete trip prices.
+ * - Supports different pricing types (Per Pax / Per Unit).
+ * - Manages pricing details such as:
+ *    • Original Price
+ *    • Sale Price
+ *    • Child Price
+ *    • Currency
+ *    • Pax Range
+ *    • Notes
+ * - Opens the Child Policy modal for configuring child pricing rules.
+ *
+ * Workflow:
+ * 1. Select a trip using the TripHeader component.
+ * 2. Load all existing prices for the selected trip.
+ * 3. Expand the Add/Edit panel.
+ * 4. Create or update a pricing record.
+ * 5. Display all prices in a table with edit/delete actions.
+ *
+ * Dependencies:
+ * - Redux (tripSlice)
+ * - TripHeader
+ * - ChildPolicy
+ * - CurrencySelect
+ * - LoadingPage
+ * - PopUp
+ */
 import React, { useEffect, useState } from "react";
 import TripHeader from "./TripHeader";
 import { Form, Row, Col, Button, Table } from "react-bootstrap";
@@ -22,13 +53,24 @@ const priceTypes = [
 ];
 function TripPrices() {
   const dispatch = useDispatch();
+  // Controls visibility of the Add/Edit pricing panel
   const [Expanded, setExpanded] = useState(false);
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
+
+  // Popup notification state
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("alert");
+
+  // Currently selected trip
   const [trip_id, setTrip_id] = useState(0);
+
+  // Indicates whether the form is editing an existing record
   const [isUpdate, setIsUpdate] = useState(0);
+
+  // Controls Child Policy modal visibility
   const [showChildPolicy, setShowChildPolicy] = useState(false);
+
+  // Form model used for creating/updating trip prices
   const [formData, setFormData] = useState({
     id: 0,
     trip_id: trip_id,
@@ -42,16 +84,15 @@ function TripPrices() {
     pax_to: 0,
     pricing_type: 1,
   });
-  //   useEffect(() => {
-  //     dispatch(GetTrip_Prices(trip_id));
-  //     return () => {};
-  //   }, [dispatch]);
-
+  // Called whenever a trip is selected from TripHeader.
+  // Loads all pricing records for the selected trip
+  // and resets the editor form.
   const handleTripChange = (trip) => {
     setTrip_id(trip?.id);
     dispatch(GetTrip_Prices(trip?.id));
     resetForm();
   };
+  // Retrieve pricing data and loading state from Redux
   const { loading, error, TripPriceList } = useSelector((state) => state.trips);
   const handleInputChange = (e) => {
     setFormData({
@@ -59,6 +100,8 @@ function TripPrices() {
       [e.target.name]: e.target.value,
     });
   };
+  // Deletes an existing pricing record.
+  // The API uses a soft-delete flag instead of a dedicated delete endpoint.
   const handleDeleteClick = (price) => {
     let data = {
       id: price.id,
@@ -76,6 +119,7 @@ function TripPrices() {
     dispatch(SaveTripPrices(data)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
+        // Refresh pricing list after successful deletion
         dispatch(GetTrip_Prices(trip_id));
       } else {
         setShowPopup(true);
@@ -83,6 +127,8 @@ function TripPrices() {
       }
     });
   };
+  // Creates a new price or updates an existing one.
+  // The same API endpoint handles both operations based on the record id.
   const handleAdd = (e) => {
     e.preventDefault();
     formData["trip_id"] = trip_id;
@@ -111,6 +157,7 @@ function TripPrices() {
       });
     });
   };
+  // Clears the editor and switches back to Add mode.
   const resetForm = () => {
     setIsUpdate(false);
     setFormData({
@@ -127,6 +174,8 @@ function TripPrices() {
       pricing_type: 1,
     });
   };
+  // Loads the selected pricing record into the form
+  // and expands the editor for updating.
   const handleEdit = (trip) => {
     setIsUpdate(true);
     setExpanded(true);

@@ -1,3 +1,24 @@
+/**
+ * FacilityTranslationModal Component
+ *
+ * Displays a modal for creating or editing
+ * facility translations.
+ *
+ * Features:
+ * - Add a new translation
+ * - Edit an existing translation
+ * - Save translation to the database
+ * - Refresh facility list after saving
+ * - Display loading indicator while saving
+ *
+ * @param {boolean} show Controls modal visibility.
+ * @param {Function} setShow Updates modal visibility.
+ * @param {Object} currentTranslation Translation currently being edited.
+ * @param {Function} setCurrentTranslation Updates translation state.
+ * @param {Function} setPopupMessage Displays popup message.
+ * @param {Function} setPopupType Sets popup type (success, error, etc.).
+ * @param {Function} setShowPopup Controls popup visibility.
+ */
 import React from "react";
 import { Modal, Spinner, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,34 +38,53 @@ const FacilityTranslationModal = ({
   setShowPopup,
 }) => {
   const dispatch = useDispatch();
+  // Loading state while saving facility translations
   const { loading } = useSelector((state) => state.facility); // Get translation status from Redux store
 
-  // Handle translation submission
-  const handleTranslationSubmit = async (e) => {
+  /**
+   * Saves the current facility translation.
+   *
+   * On success:
+   * - Refresh the facility list
+   * - Close the translation modal
+   *
+   * On failure:
+   * - Display validation or server errors
+   *
+   * @param {React.FormEvent<HTMLFormElement>} event
+   */
+  const handleTranslationSubmit = (e) => {
     e.preventDefault();
-    try {
-      dispatch(SaveFacilityTranslation(currentTranslation)).then((result) => {
-        if (result.payload && result.payload.success) {
-          dispatch(GetFacilityWithTranslation());
-          setShow(false);
-        } else {
-          setShowPopup(true);
-          setPopupType("error");
-          setPopupMessage(result.payload.errors);
-        }
-      });
-    } catch (error) {
-      const errorMessage =
-        typeof error === "string"
-          ? error
-          : error.message || "Failed to save  translation";
-      setPopupMessage(errorMessage);
-      setPopupType("error");
-      setShowPopup(true);
-    }
+    // try {
+    dispatch(SaveFacilityTranslation(currentTranslation)).then((result) => {
+      if (result.payload && result.payload.success) {
+        // Reload facilities to display the latest translations.
+        dispatch(GetFacilityWithTranslation());
+        setShow(false);
+      } else {
+        setShowPopup(true);
+        setPopupType("error");
+        setPopupMessage(result.payload.errors);
+      }
+    });
+    // }
+    // catch (error) {
+    //   const errorMessage =
+    //     typeof error === "string"
+    //       ? error
+    //       : error.message || "Failed to save  translation";
+    //   setPopupMessage(errorMessage);
+    //   setPopupType("error");
+    //   setShowPopup(true);
+    // }
   };
 
-  // Handle translation input changes
+  /**
+   * Updates the translation model whenever
+   * an input value changes.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement>} event
+   */
   const handleTranslationChange = (e) => {
     const { name, value } = e.target;
     setCurrentTranslation((prev) => ({ ...prev, [name]: value }));
@@ -64,7 +104,7 @@ const FacilityTranslationModal = ({
                 name="lang_code"
                 value={currentTranslation.lang_code}
                 onChange={handleTranslationChange}
-                requireds
+                required
               >
                 <LangSelect />
                 {/* <option value="en">EN-English</option>

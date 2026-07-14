@@ -1,3 +1,16 @@
+/**
+ * BookingGrid Component
+ *
+ * Displays all trip bookings in a paginated table.
+ *
+ * Features:
+ * - Retrieve bookings from the API
+ * - Filter bookings by date, trip, booking code and client email
+ * - Search bookings by trip name
+ * - Export booking list to Excel
+ * - Client-side pagination
+ * - Error handling using popup notifications
+ */
 import React, { useMemo, useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -15,23 +28,31 @@ import DatePicker from "react-datepicker";
 import "./Booking.scss";
 function BookingGrid() {
   const dispatch = useDispatch();
+  // Default "To Date" is one month ahead of today's date.
   const newDate = new Date();
   newDate.setMonth(newDate.getMonth() + 1);
+  // Current search keyword (reserved for future generic searching)
   const [query, setQuery] = useState("");
   const [data, setData] = useState({});
+  // Pagination settings
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  //   const [page, setPage] = useState(1);
-  //   const [pageSize, setPageSize] = useState(5);
+  // Current sorting configuration
   const [sortBy, setSortBy] = useState({ key: null, dir: "asc" });
+  // Filter date range
   const [date_from, setDate_from] = useState(new Date());
   const [date_to, setDate_to] = useState(newDate);
+  // Popup notification state
   const [showPopup, setShowPopup] = useState(false); // State for popup visibility
   const [popupMessage, setPopupMessage] = useState(""); // State for popup message
   const [popupType, setPopupType] = useState("alert"); // State for popup type
+
+  // Controls visibility of the filter section
   const [filterExpanded, setFilterExpanded] = useState(false);
+  // Search term used for filtering bookings by trip name
   const [searchTerm, setSearchTerm] = useState(""); // State for search functionality
+  // Request model sent to the booking API
   const [formData, setFormData] = useState({
     client_email: "",
     booking_code: "",
@@ -41,31 +62,51 @@ function BookingGrid() {
     pageNumber: currentPage,
     pageSize: itemsPerPage,
   });
+  // Booking information from Redux store
   const { loading, error, BookingData } = useSelector((state) => state.booking);
+  // Available trips for the filter dropdown
   const { TripsMain } = useSelector((state) => state.trips);
-
+  /**
+   * Load bookings and trip list when the component is first rendered.
+   */
   useEffect(() => {
     dispatch(GetAllBooking(formData));
     let data = { destination_id: 0, trip_type: 0 };
     dispatch(GetTrip_Mains(data));
     return () => {};
   }, []);
-
+  /**
+   * Recalculate total number of pages whenever
+   * booking data changes.
+   */
   useEffect(() => {
     const totalPages = Math.ceil(BookingData?.totalPages / itemsPerPage);
     setTotalPages(totalPages);
     return () => {};
   }, [BookingData]);
-
+  /**
+   * Loads bookings for the selected page.
+   *
+   * @param {number} page Selected page number.
+   */
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      // let req = { pageNumber: page, pageSize: itemsPerPage };
       formData["pageNumber"] = page;
       formData["itemsPerPage"] = itemsPerPage;
       dispatch(GetAllBooking(formData));
     }
   };
+
+  /**
+   * Retrieves bookings based on the selected filter criteria.
+   *
+   * Filters include:
+   * - Date range
+   * - Client email
+   * - Booking code
+   * - Trip
+   */
   const GetBookingByFilter = (e) => {
     e.preventDefault();
     formData["date_from"] = format(date_from, "dd-MM-yyyy hh:mm:ss");
@@ -76,7 +117,11 @@ function BookingGrid() {
       setShowPopup(true);
     });
   };
-  // columns derived from keys of first row
+  /**
+   * Defines the columns displayed in the booking table.
+   * The "id" property maps to the booking object,
+   * while "name" is shown as the column header.
+   */
   const columns = useMemo(() => {
     //const keys = data.length ? Object.keys(data[0]) : [];
     const keys = [
@@ -100,42 +145,21 @@ function BookingGrid() {
     return keys; // keep id hidden as column in this example
   }, []);
 
-  // filter
+  /**
+   * Filters local data using the search query.
+   * (Currently not used by the table.)
+   */
   const filtered = useMemo(() => {
     if (!query) return data;
     const q = query.toLowerCase();
     return data.filter((row) =>
-      Object.values(row).some((v) => String(v).toLowerCase().includes(q))
+      Object.values(row).some((v) => String(v).toLowerCase().includes(q)),
     );
   }, [data, query]);
-
-  // sort
-  //   const sorted = useMemo(() => {
-  //     if (!sortBy.key) return filtered;
-  //     const sortedCopy = [...filtered].sort((a, b) => {
-  //       const va = a[sortBy.key];
-  //       const vb = b[sortBy.key];
-  //       if (va == null) return 1;
-  //       if (vb == null) return -1;
-  //       if (typeof va === "number" && typeof vb === "number") {
-  //         return sortBy.dir === "asc" ? va - vb : vb - va;
-  //       }
-  //       return sortBy.dir === "asc"
-  //         ? String(va).localeCompare(String(vb))
-  //         : String(vb).localeCompare(String(va));
-  //     });
-  //     return sortedCopy;
-  //   }, [filtered, sortBy]);
-
-  // pagination
-  //   const total = sorted.length;
-  //   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  //   const paged = useMemo(() => {
-  //     const start = (page - 1) * pageSize;
-  //     return sorted.slice(start, start + pageSize);
-  //   }, [sorted, page, pageSize]);
-
-  // Handlers
+  /**
+   * Toggles ascending/descending sorting
+   * for the selected column.
+   */
   const toggleSort = (key) => {
     if (sortBy.key === key) {
       setSortBy({ key, dir: sortBy.dir === "asc" ? "desc" : "asc" });
@@ -143,7 +167,10 @@ function BookingGrid() {
       setSortBy({ key, dir: "asc" });
     }
   };
-
+  /**
+   * Exports the currently loaded bookings
+   * to an Excel (.xlsx) file.
+   */
   const exportToExcel = () => {
     // exportAll: if true export filtered & sorted FULL set; if false export currently visible page
     const exportData = BookingData?.bookings;
@@ -165,9 +192,14 @@ function BookingGrid() {
       `grid-data-${new Date()
         .toISOString()
         .slice(0, 19)
-        .replace(/[:T]/g, "-")}.xlsx`
+        .replace(/[:T]/g, "-")}.xlsx`,
     );
   };
+
+  /**
+   * Updates the filter model whenever
+   * a form control value changes.
+   */
   const fillFormData = (e) => {
     setFormData({
       ...formData,
@@ -187,6 +219,7 @@ function BookingGrid() {
           <span className="ms-2">Filter</span>
         </Button>
       </div>
+      {/* Booking Filter Panel */}
       {filterExpanded && (
         <div className="filter_panel">
           <Form>
@@ -300,13 +333,6 @@ function BookingGrid() {
           />
         </div>
 
-        {/* <button
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={() => exportToExcel(true)}
-        >
-          Export all to Excel
-        </button> */}
-
         <Button
           disabled={BookingData == null || BookingData?.bookings?.length == 0}
           className="px-4 py-2 border rounded darkBlue-Btn mx-4"
@@ -315,6 +341,8 @@ function BookingGrid() {
           Export to Excel
         </Button>
       </div>
+
+      {/* Booking Results Table */}
       <div className="result_list">
         {" "}
         <Table responsive hover bordered className="w-auto">
@@ -328,11 +356,6 @@ function BookingGrid() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="capitalize">{col.name}</span>
-                    {/* {sortBy.key === col && (
-                      <span className="text-sm">
-                        {sortBy.dir === "asc" ? "▲" : "▼"}
-                      </span>
-                    )} */}
                   </div>
                 </th>
               ))}
@@ -344,7 +367,7 @@ function BookingGrid() {
                 ?.filter((item) =>
                   item.trip_name
                     .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
+                    .includes(searchTerm.toLowerCase()),
                 )
                 .map((row) => (
                   <tr key={row.id} className="border-t hover:bg-gray-50">
@@ -374,7 +397,7 @@ function BookingGrid() {
             )}
           </tbody>
         </Table>
-        {/* Pagination */}
+        {/* Booking Pagination */}
         <Pagination className="mt-3 justify-content-center">
           <Pagination.Prev
             onClick={() => handlePageChange(currentPage - 1)}
@@ -403,49 +426,6 @@ function BookingGrid() {
         type={popupType}
         autoClose={3000}
       />
-      {/* <div className="overflow-x-auto border rounded">
-        <table className="min-w-full text-left">
-          <thead>
-            <tr className="bg-gray-100">
-              {columns.map((col, index) => (
-                <th
-                  key={index}
-                  className="px-4 py-2 cursor-pointer select-none"
-                  onClick={() => toggleSort(col.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="capitalize">{col.name}</span>
-                    {sortBy.key === col && (
-                      <span className="text-sm">
-                        {sortBy.dir === "asc" ? "▲" : "▼"}
-                      </span>
-                    )}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {BookingData && BookingData?.bookings?.length > 0 ? (
-              BookingData?.bookings?.map((row) => (
-                <tr key={row.id} className="border-t hover:bg-gray-50">
-                  {columns.map((col) => (
-                    <td key={col.id} className="px-4 py-2">
-                      {String(row[col.id])}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td className="p-4" colSpan={columns.length}>
-                  No results
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div> */}
     </section>
   );
 }

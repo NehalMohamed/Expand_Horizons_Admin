@@ -1,18 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Modal, Button, Form, Col, Row } from "react-bootstrap";
-import { FaPlus, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { CreateUserByAdmin, fetchRoles } from "../../slices/usersSlice";
+import { CreateUserByAdmin } from "../../slices/usersSlice";
 import LoadingPage from "../Loader/LoadingPage";
 import PopUp from "../Shared/popup/PopUp";
 
+/**
+ * AddUserModal Component
+ *
+ * Modal used by administrators to create new users.
+ *
+ * Features:
+ * - Client-side form validation.
+ * - Create new user via Redux.
+ * - Display validation and server errors.
+ * - Refresh user list after successful creation.
+ */
 function AddUserModal({ show, onHide, refreshUsers }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // Form validation state
   const [validated, setvalidated] = useState(false);
+
+  // Stores validation messages for each field
   const [errorsLst, seterrorsLst] = useState({});
+
+  // Controls error popup visibility
   const [showAlert, setShowAlert] = useState(false);
+
+  // Form data sent to the API
   const [formData, setformData] = useState({
     FirstName: "",
     LastName: "",
@@ -21,14 +39,17 @@ function AddUserModal({ show, onHide, refreshUsers }) {
     ConfirmPassword: "",
     Role: "",
   });
+
+  // Redux state
   const { loading, error, User, Roles } = useSelector((state) => state.users);
 
-  // useEffect(() => {
-  //   dispatch(fetchRoles());
-  //   return () => {};
-  // }, []);
-
-  //validate form inputs
+  /**
+   * Validate user input before submitting.
+   *
+   * Returns:
+   * true  -> Validation passed.
+   * false -> Validation failed.
+   */
   const validate = () => {
     if (formData.FirstName == null || formData.FirstName.trim() == "") {
       seterrorsLst({
@@ -45,6 +66,7 @@ function AddUserModal({ show, onHide, refreshUsers }) {
       });
       return false;
     }
+
     if (!/^\S+@\S+\.\S+$/.test(formData.email) || formData.email.trim() == "") {
       seterrorsLst({
         ...errorsLst,
@@ -60,6 +82,7 @@ function AddUserModal({ show, onHide, refreshUsers }) {
       });
       return false;
     }
+
     if (formData.ConfirmPassword !== formData.password) {
       seterrorsLst({
         ...errorsLst,
@@ -67,16 +90,31 @@ function AddUserModal({ show, onHide, refreshUsers }) {
       });
       return false;
     }
+
     return true;
   };
+
+  /**
+   * Handles form submission.
+   *
+   * Steps:
+   * 1. Validate form.
+   * 2. Add default language.
+   * 3. Call CreateUser API.
+   * 4. Reset form after success.
+   * 5. Refresh user list.
+   */
   const signin = (event) => {
     event.preventDefault();
-    // validation
+
     if (validate()) {
       formData["lang"] = "en";
+
       dispatch(CreateUserByAdmin(formData)).then((result) => {
         if (result.payload && result.payload.isSuccessed) {
           setShowAlert(false);
+
+          // Reset form
           setformData({
             FirstName: "",
             LastName: "",
@@ -85,7 +123,11 @@ function AddUserModal({ show, onHide, refreshUsers }) {
             ConfirmPassword: "",
             Role: "",
           });
+
+          // Close modal
           onHide();
+
+          // Reload users table
           refreshUsers();
         } else {
           setShowAlert(true);
@@ -93,28 +135,45 @@ function AddUserModal({ show, onHide, refreshUsers }) {
       });
     }
   };
+
+  /**
+   * Closes the popup message.
+   */
   const closeAlert = () => {
     setShowAlert(false);
   };
+
+  /**
+   * Updates form state whenever
+   * an input value changes.
+   *
+   * Also clears previous validation errors.
+   */
   const fillFormData = (e) => {
     setvalidated(false);
     seterrorsLst({});
+
     setformData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
+
   return (
     <Modal show={show} onHide={onHide} size="lg">
+      {/* Modal Header */}
       <Modal.Header closeButton>
         <Modal.Title className="page-title">Add User</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form onSubmit={signin} noValidate>
+          {/* User Name */}
           <Row className="mb-3">
             <Col lg={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="formLabel">First Name</Form.Label>
+
                 <Form.Control
                   type="text"
                   placeholder="First Name"
@@ -123,16 +182,19 @@ function AddUserModal({ show, onHide, refreshUsers }) {
                   name="FirstName"
                   onChange={fillFormData}
                 />
+
                 {errorsLst.firstname && (
-                  <Form.Text type="invalid" className="errorTxt">
+                  <Form.Text className="errorTxt">
                     {errorsLst.firstname}
                   </Form.Text>
                 )}
               </Form.Group>
             </Col>
+
             <Col lg={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="formLabel">Last Name</Form.Label>
+
                 <Form.Control
                   type="text"
                   placeholder="Last Name"
@@ -141,36 +203,41 @@ function AddUserModal({ show, onHide, refreshUsers }) {
                   name="LastName"
                   onChange={fillFormData}
                 />
+
                 {errorsLst.lastname && (
-                  <Form.Text type="invalid" className="errorTxt">
+                  <Form.Text className="errorTxt">
                     {errorsLst.lastname}
                   </Form.Text>
                 )}
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Email & Role */}
           <Row className="mb-3">
-            <Col xs={12} md={6} className="mb-2 mb-md-0">
+            <Col xs={12} md={6}>
               <Form.Group className="mb-3">
-                <Form.Label className="formLabel">email</Form.Label>
+                <Form.Label className="formLabel">Email</Form.Label>
+
                 <Form.Control
                   type="email"
-                  placeholder="email"
+                  placeholder="Email"
                   required
                   name="email"
                   className="formInput"
                   onChange={fillFormData}
                 />
+
                 {errorsLst.email && (
-                  <Form.Text type="invalid" className="errorTxt">
-                    {errorsLst.email}
-                  </Form.Text>
+                  <Form.Text className="errorTxt">{errorsLst.email}</Form.Text>
                 )}
               </Form.Group>
             </Col>
-            <Col xs={12} md={6} className="mb-2 mb-md-0">
+
+            <Col xs={12} md={6}>
               <Form.Group controlId="service">
                 <Form.Label className="formLabel">Role</Form.Label>
+
                 <Form.Control
                   as="select"
                   name="Role"
@@ -180,8 +247,9 @@ function AddUserModal({ show, onHide, refreshUsers }) {
                   className="form-select"
                 >
                   <option value="">Select Role</option>
+
                   {Roles &&
-                    Roles?.map((role, index) => (
+                    Roles.map((role, index) => (
                       <option key={index} value={role.name}>
                         {role.name}
                       </option>
@@ -191,29 +259,34 @@ function AddUserModal({ show, onHide, refreshUsers }) {
             </Col>
           </Row>
 
+          {/* Password */}
           <Row className="mb-3">
-            <Col lg={6} md={12} sm={12} xs={12}>
+            <Col lg={6}>
               <Form.Group>
-                <Form.Label className="formLabel">password</Form.Label>
+                <Form.Label className="formLabel">Password</Form.Label>
+
                 <Form.Control
                   type="password"
-                  placeholder="password"
+                  placeholder="Password"
                   required
                   name="password"
                   className="formInput"
                   minLength={6}
                   onChange={fillFormData}
                 />
+
                 {errorsLst.password && (
-                  <Form.Text type="invalid" className="errorTxt">
+                  <Form.Text className="errorTxt">
                     {errorsLst.password}
                   </Form.Text>
                 )}
               </Form.Group>
             </Col>
-            <Col lg={6} md={12} sm={12} xs={12}>
+
+            <Col lg={6}>
               <Form.Group>
                 <Form.Label className="formLabel">Confirm Password</Form.Label>
+
                 <Form.Control
                   required
                   type="password"
@@ -223,6 +296,7 @@ function AddUserModal({ show, onHide, refreshUsers }) {
                   minLength={6}
                   onChange={fillFormData}
                 />
+
                 {errorsLst.ConfirmPassword && (
                   <Form.Text className="errorTxt">
                     {errorsLst.ConfirmPassword}
@@ -231,16 +305,22 @@ function AddUserModal({ show, onHide, refreshUsers }) {
               </Form.Group>
             </Col>
           </Row>
+
+          {/* Submit Button */}
           <Button type="submit" className="frmBtn purbleBtn FullWidthBtn">
             Add User
           </Button>
-          {loading ? <LoadingPage /> : null}
-          {showAlert ? (
+
+          {/* Loading Overlay */}
+          {loading && <LoadingPage />}
+
+          {/* Error Popup */}
+          {showAlert && (
             <PopUp
               msg={User != null ? User.message : "Error"}
               closeAlert={closeAlert}
             />
-          ) : null}
+          )}
         </Form>
       </Modal.Body>
     </Modal>

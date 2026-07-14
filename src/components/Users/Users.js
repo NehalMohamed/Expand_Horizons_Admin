@@ -7,19 +7,21 @@ import LoadingPage from "../Loader/LoadingPage";
 import PopUp from "../Shared/popup/PopUp";
 import "./Users.scss";
 
-// Component for Users Management
+// Users Management Page
 const Users = () => {
   const dispatch = useDispatch();
-  // Get users data and status from Redux store
+
+  // Get users data and UI state from Redux store
   const { data, loading, error, searchRole } = useSelector(
     (state) => state.users,
   );
-  // State for popup management
+
+  // Popup state (used for displaying API errors)
   const [showPopup, setShowPopup] = React.useState(false);
   const [popupMessage, setPopupMessage] = React.useState("");
   const [popupType, setPopupType] = React.useState("alert");
 
-  // Fetch users on component mount
+  // Load users list when the page is opened
   useEffect(() => {
     dispatch(fetchUsers())
       .unwrap()
@@ -30,7 +32,8 @@ const Users = () => {
       });
   }, [dispatch]);
 
-  // Filter users by role if searchRole is specified
+  // Filter users based on the entered role
+  // If no search text is entered, display all users
   const filteredUsers = searchRole
     ? data &&
       data.filter((user) =>
@@ -38,14 +41,14 @@ const Users = () => {
       )
     : data;
 
-  // Show loading spinner if data is loading
+  // Show loading screen while fetching users
   if (loading) {
     return <LoadingPage />;
   }
 
   return (
     <Container className="users-page">
-      {/* PopUp for displaying error messages */}
+      {/* Error/Information popup */}
       <PopUp
         show={showPopup}
         closeAlert={() => setShowPopup(false)}
@@ -54,9 +57,11 @@ const Users = () => {
         autoClose={popupType === "error" ? 5000 : null}
       />
 
-      {/* Header section with title and role search */}
+      {/* Page Header */}
       <div className="d-flex justify-content-between align-items-center">
         <h2 className="mb-4 questions-heading">Users Management</h2>
+
+        {/* Search users by role */}
         <div className="mb-4 position-relative" style={{ width: "250px" }}>
           <FaSearch
             className="position-absolute"
@@ -67,6 +72,7 @@ const Users = () => {
               color: "#888",
             }}
           />
+
           <input
             type="text"
             className="form-control ps-6"
@@ -78,7 +84,7 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Users table */}
+      {/* Users List */}
       <div className="table-responsive">
         <Table responsive hover className="users-table">
           <thead>
@@ -89,13 +95,21 @@ const Users = () => {
               <th>Email Confirmed</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredUsers &&
               filteredUsers.map((user) => (
                 <tr key={user.id}>
+                  {/* Full Name */}
                   <td>{`${user.firstName} ${user.lastName}`}</td>
+
+                  {/* User Email */}
                   <td>{user.email}</td>
+
+                  {/* Assigned Role */}
                   <td>{user.roles}</td>
+
+                  {/* Email Verification Status */}
                   <td>
                     {user.emailConfirmed ? (
                       <span>Confirmed</span>
@@ -109,7 +123,7 @@ const Users = () => {
         </Table>
       </div>
 
-      {/* Show message if no users found */}
+      {/* Display message when no matching users are found */}
       {filteredUsers.length === 0 && !loading && (
         <div className="no-results">
           No users found with the specified role.

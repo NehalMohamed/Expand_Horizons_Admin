@@ -1,3 +1,18 @@
+/**
+ * SideMenu Component
+ *
+ * Displays the application's navigation menu based on
+ * the authenticated user's role.
+ *
+ * Features:
+ * - Role-based menu items
+ * - Expand / Collapse sidebar
+ * - Nested submenus
+ * - User information
+ * - Logout
+ *
+ * @param {Function} ChangeLayoutWidth Updates the layout when the sidebar is collapsed or expanded.
+ */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -10,8 +25,6 @@ import {
 import "./SideMenu.scss";
 import { FaChevronDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import TripsSubMenu from "./TripsSubMenu";
-import DestinationSubMenu from "./DestinationSubMenu";
 import { allMenuItems, SubMenuItems } from "./menuItems";
 import * as FiIcons from "react-icons/fi";
 import * as FaIcons from "react-icons/fa";
@@ -20,32 +33,53 @@ import * as Fa6Icons from "react-icons/fa6";
 const allIcons = { ...FaIcons, ...IO5Icons, ...FiIcons, ...Fa6Icons };
 export default function SideMenu({ ChangeLayoutWidth }) {
   const navigate = useNavigate();
-  const [Items, setItems] = useState([]);
+  // Stores menu items available for the logged-in user.
+  const [items, setItems] = useState([]);
+
+  // Determines whether the sidebar is collapsed.
   const [collapsed, setCollapsed] = useState(false);
+
+  // Tracks the currently expanded main submenu.
   const [openMenu, setOpenMenu] = useState(null);
+
+  // Tracks destination submenu state.
+  // (Can be extended for additional submenu groups.)
   const [destOpenMenu, setDestOpenMenu] = useState(null);
-  const [MyName, setMyName] = useState("");
+
+  // Logged-in user's display name.
+  const [myName, setMyName] = useState("");
+  /**
+   * Logs the current user out.
+   *
+   * Removes authentication data from local storage
+   * and redirects the user to the home page.
+   */
   const logOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/");
   };
+  /**
+   * Expands or collapses a submenu.
+   *
+   * @param {string} menu Menu identifier.
+   */
   const toggleSubmenu = (menu) => {
     setOpenMenu(openMenu === menu ? null : menu);
   };
-
+  /**
+   * Expands or collapses the destination submenu.
+   *
+   * @param {string} menu Menu identifier.
+   */
   const toggleDestSubmenu = (menu) => {
     setDestOpenMenu(destOpenMenu === menu ? null : menu);
   };
-  // useEffect(() => {
-  //   const userLocal = localStorage.getItem("user");
-  //   if (userLocal) {
-  //     const user = JSON.parse(userLocal);
-  //     if (user) {
-  //       setMyName(`${user.firstName} ${user.lastName}`);
-  //     }
-  //   }
-  // }, []);
+  /**
+   * Loads the authenticated user from local storage.
+   *
+   * Filters menu items according to the user's role.
+   */
   useEffect(() => {
     const userLocal = localStorage.getItem("user");
     if (userLocal) {
@@ -54,8 +88,10 @@ export default function SideMenu({ ChangeLayoutWidth }) {
         setMyName(`${user.firstName} ${user.lastName}`);
 
         // Filter menu items based on user role
+        // Only display menu items that the current role
+        // is allowed to access.
         const authorizedMenuItems = allMenuItems.filter((item) =>
-          item.roles.includes(user.role)
+          item.roles.includes(user.role),
         );
 
         setItems(authorizedMenuItems || []);
@@ -86,8 +122,8 @@ export default function SideMenu({ ChangeLayoutWidth }) {
         </button>
       </div>
       <ul>
-        {Items &&
-          Items.map((item, index) => {
+        {items &&
+          items.map((item, index) => {
             const IconComponent = allIcons[item.icon];
             return item.withSub == false ? (
               <li key={index}>
@@ -133,66 +169,20 @@ export default function SideMenu({ ChangeLayoutWidth }) {
                             </Link>
                           </li>
                         );
-                      }
+                      },
                     )}
                 </ul>
                 {/* <TripsSubMenu openMenu={openMenu} /> */}
               </li>
             );
           })}
-        {/* <li>
-          <Link to="/dashboard">
-            <FaChartSimple /> <span className="menu-label">Dashboard</span>
-          </Link>
-        </li>
-        <li>
-          <div
-            className={`menu-item ${
-              destOpenMenu === "destinations" ? "open" : ""
-            }`}
-          >
-            <Link to="/destinations" className="left">
-              <FaCity />
-              <span className="menu-label">Destinations</span>
-            </Link>
-            {!collapsed && (
-              <span
-                className="arrow"
-                onClick={() => toggleDestSubmenu("destinations")}
-              >
-                <FaChevronDown className="arrow" />
-              </span>
-            )}
-          </div>
-          <DestinationSubMenu openMenu={destOpenMenu} />
-        </li>
-
-        <li>
-          <div className={`menu-item ${openMenu === "trips" ? "open" : ""}`}>
-            <Link to="/trips" className="left">
-              <FaShip />
-              <span className="menu-label">Trips</span>
-            </Link>
-            {!collapsed && (
-              <span className="arrow" onClick={() => toggleSubmenu("trips")}>
-                <FaChevronDown className="arrow" />
-              </span>
-            )}
-          </div>
-          <TripsSubMenu openMenu={openMenu} />
-        </li>
-        <li>
-          <Link to="/facility">
-            <FaInfo /> <span className="menu-label">Facilities Setting</span>
-          </Link>
-        </li> */}
       </ul>
       {/* Bottom Section */}
       <div className="side-menu-footer">
         <div className="footer-content">
           <div className="user-info">
             <FiUser className="user-icon" />
-            {!collapsed && <span className="user-title">{MyName}</span>}
+            {!collapsed && <span className="user-title">{myName}</span>}
           </div>
 
           <div className="menu-actions">
@@ -201,7 +191,7 @@ export default function SideMenu({ ChangeLayoutWidth }) {
               {!collapsed && <span>Search</span>}
             </button>
 
-            {MyName && (
+            {myName && (
               <button className="menu-action-button" onClick={logOut}>
                 <FiLogOut className="action-icon" />
                 {!collapsed && <span>Logout</span>}

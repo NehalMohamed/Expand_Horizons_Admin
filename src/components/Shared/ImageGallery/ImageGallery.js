@@ -1,25 +1,71 @@
-import React, { useState, useEffect } from "react";
+/**
+ * ImageGallery Component
+ *
+ * Displays a collection of images with support for:
+ * - Image preview
+ * - Lightbox viewer
+ * - Previous / Next navigation
+ * - Remove image
+ * - Set default image
+ *
+ * @param {Object[]} images Collection of images to display.
+ * @param {Function} handleRemove Removes an image.
+ * @param {Function} handleSetDefault Sets an image as the default.
+ */
+import React, { useState, useCallback } from "react";
 import { FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
 function ImageGallery({ images, handleRemove, handleSetDefault }) {
+  // Index of the currently selected image displayed in the lightbox.
+  // A value of null indicates that the lightbox is closed.
   const [currentIndex, setCurrentIndex] = useState(null);
-  // Open modal
-  const openModal = (index) => {
+  /**
+   * Opens the lightbox and displays
+   * the selected image.
+   *
+   * @param {number} index Index of the selected image.
+   */
+  const openModal = useCallback((index) => {
     setCurrentIndex(index);
-  };
+  }, []);
 
-  // Close modal
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setCurrentIndex(null);
-  };
+  }, []);
 
-  // Navigate next/prev
-  const prevImage = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
+  /**
+   * Displays the previous image.
+   *
+   * When the first image is reached,
+   * navigation wraps around to the last image.
+   */
+  // const prevImage = () => {
+  //   setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  // };
+  const prevImage = useCallback(() => {
+    setCurrentIndex((previous) =>
+      previous === 0 ? images.length - 1 : previous - 1,
+    );
+  }, [images.length]);
+  /**
+   * Displays the next image.
+   *
+   * When the last image is reached,
+   * navigation wraps around to the first image.
+   */
+  const nextImage = useCallback(() => {
+    setCurrentIndex((previous) =>
+      previous === images.length - 1 ? 0 : previous + 1,
+    );
+  }, [images.length]);
+  /**
+   * Enables keyboard navigation while
+   * the lightbox is open.
+   *
+   * Supported Keys:
+   * - Escape: Close lightbox
+   * - Left Arrow: Previous image
+   * - Right Arrow: Next image
+   */
   // ✅ Keyboard navigation
   // useEffect(() => {
   //   if (currentIndex !== null) {

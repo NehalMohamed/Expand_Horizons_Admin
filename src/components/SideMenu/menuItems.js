@@ -1,18 +1,3 @@
-// export const MenuItems = {
-//   Admin: [
-//     // { path: "/dashboard", title: "Dashboard", icon: "FiHome" },
-//     { path: "/home", title: "home", icon: "FiHome" },
-//     { path: "/users", title: "Users", icon: "FiUsers" },
-//     { path: "/questions", title: "Questions", icon: "FiHelpCircle" },
-//     { path: "/features", title: "Features", icon: "FiLayers" },
-//     { path: "/services", title: "Services", icon: "FiSettings" },
-//     { path: "/packages", title: "Packages", icon: "IoLogoFirebase" },
-//     { path: "/pricing", title: "Pricing", icon: "FiDollarSign" },
-//     { path: "/invoices", title: "Invoices", icon: "FaFileInvoice" },
-//   ],
-//   accountant: [{ path: "/invoices", title: "Invoices", icon: "FaFileInvoice" }],
-// };
-
 export const allMenuItems = [
   {
     id: "dashboard",
@@ -38,13 +23,13 @@ export const allMenuItems = [
     roles: ["Admin", "manager", "editor"],
     withSub: true,
   },
-  {    
+  {
     id: "transfer",
     title: "Transfer Category",
-    icon: "FaCar", 
+    icon: "FaCar",
     path: "/transfer",
     roles: ["Admin", "manager", "sales"],
-    withSub: true, 
+    withSub: true,
   },
   {
     id: "facility",

@@ -1,3 +1,22 @@
+/**
+ * TripsDropDown Component
+ *
+ * Purpose:
+ * - Displays a searchable dropdown containing all available trips.
+ * - Allows users to quickly search and select a trip.
+ * - Returns the selected trip object to the parent component.
+ * - Provides a shortcut to copy the selected trip name to the clipboard.
+ *
+ * Features:
+ * - Loads trips from the API using Redux.
+ * - Client-side search filtering.
+ * - Automatically closes when clicking outside.
+ * - Shows loading indicator while fetching data.
+ *
+ * Props:
+ * @param {Function} handleChange
+ * Callback executed when the user selects a trip.
+ */
 import React, { useEffect, useState, useRef } from "react";
 import { Form, Spinner, Button } from "react-bootstrap";
 import { FaShip } from "react-icons/fa";
@@ -6,12 +25,21 @@ import { GetTrip_Mains } from "../../slices/tripSlice";
 import { FiCopy } from "react-icons/fi";
 function TripsDropDown({ handleChange }) {
   const dispatch = useDispatch();
+  // Retrieve trips list and loading state from Redux
   const { TripsMain, loading, error } = useSelector((state) => state.trips);
+  // Reference used to detect clicks outside the dropdown
   const wrapperRef = useRef(null);
-  // const [selectedLocation, setSelectedLocation] = useState(null);
+
+  // Filtered search results
   const [filtered, setFiltered] = useState([]);
+
+  // Current search text
   const [search, setSearch] = useState("");
+
+  // Currently selected trip
   const [selected, setSelected] = useState(null);
+
+  // Controls dropdown visibility
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -27,12 +55,14 @@ function TripsDropDown({ handleChange }) {
     } else {
       setFiltered(
         TripsMain.filter((opt) =>
-          opt?.trip_default_name.toLowerCase().includes(search.toLowerCase())
-        )
+          opt?.trip_default_name.toLowerCase().includes(search.toLowerCase()),
+        ),
       );
     }
   }, [search, TripsMain]);
-  // Handle selection
+
+  // Handles selecting a trip from the dropdown.
+  // Updates the selected value and notifies the parent component.
   const handleSelect = (item) => {
     setSelected(item);
     handleChange(item);
@@ -59,8 +89,8 @@ function TripsDropDown({ handleChange }) {
           selected != null
             ? selected.trip_default_name
             : search != null
-            ? search
-            : ""
+              ? search
+              : ""
         }
         onChange={(e) => {
           setSearch(e.target.value);

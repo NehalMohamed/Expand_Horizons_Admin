@@ -1,3 +1,31 @@
+/**
+ * TripPickUps Component
+ *
+ * Purpose:
+ * Manages pickup locations assigned to a trip along with their multilingual
+ * translations.
+ *
+ * Features:
+ * - Select a trip and load all associated pickup locations.
+ * - Add new pickup points.
+ * - Edit existing pickup information.
+ * - Delete pickup points.
+ * - Assign display order and duration.
+ * - Manage translations for each pickup (Add / Edit / Delete).
+ * - Display pickup translations grouped under each pickup using accordions.
+ * - Automatically refresh the pickup list after every successful operation.
+ *
+ * Redux Actions:
+ * - GetPickupsAllForTrip(): Loads all pickup points for the selected trip.
+ * - SaveMainTripPickups(): Creates, updates, or deletes a pickup.
+ * - SaveTripPickupsTranslations(): Creates, updates, or deletes pickup translations.
+ *
+ * Child Components:
+ * - TripHeader: Shared trip selector.
+ * - PickupTranslationModal: Modal for managing pickup translations.
+ * - PopUp: Displays success and error messages.
+ * - LoadingPage: Displays a loading overlay while requests are processing.
+ */
 import React, { useEffect, useState } from "react";
 import TripHeader from "./TripHeader";
 import { Form, Row, Col, Button, Table, Accordion } from "react-bootstrap";
@@ -44,6 +72,7 @@ function TripPickUps() {
     delete: false,
   });
   const { loading, error, TripPickups } = useSelector((state) => state.trips);
+  // Handles trip selection and loads all pickup locations for the selected trip.
   const handleTripChange = (trip) => {
     setTrip_id(Number(trip?.id));
     let data = { trip_id: Number(trip?.id), trip_type: 1 };

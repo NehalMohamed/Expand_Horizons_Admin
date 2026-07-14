@@ -1,4 +1,24 @@
-import React, { useEffect, useState, useRef } from "react";
+/**
+ * DestinationDropDown Component
+ *
+ * A searchable dropdown used to select a destination.
+ *
+ * Features:
+ * - Loads available destinations
+ * - Filters destinations while typing
+ * - Returns the selected destination to the parent component
+ * - Copies the selected destination name to the clipboard
+ * - Automatically closes when clicking outside
+ *
+ * @param {Function} handleChange Callback invoked when a destination is selected.
+ */
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   GetDestination_Mains,
   GetImgsByDestination,
@@ -10,38 +30,91 @@ import { FiMapPin, FiCopy } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 function DestinationDropDown({ handleChange }) {
   const dispatch = useDispatch();
+  // Destination list and loading state from Redux store
   const { DestinationMain, loading } = useSelector(
-    (state) => state.destinations
+    (state) => state.destinations,
   );
+  // Reference used to detect clicks outside the dropdown
   const wrapperRef = useRef(null);
   // const [selectedLocation, setSelectedLocation] = useState(null);
-  const [filtered, setFiltered] = useState([]);
+  // Filtered destination list displayed in the dropdown
+  // const [filtered, setFiltered] = useState([]);
+
+  // Search text entered by the user
   const [search, setSearch] = useState("");
+
+  // Currently selected destination
   const [selected, setSelected] = useState(null);
+
+  // Controls dropdown visibility
   const [show, setShow] = useState(false);
+
+  /**
+   * Loads available destinations
+   * when the component is first rendered.
+   */
   useEffect(() => {
     dispatch(GetDestination_Mains(false));
-    return () => {};
   }, [dispatch]);
 
-  // Filter options when search changes
-  useEffect(() => {
-    if (search.trim() === "") {
-      setFiltered(DestinationMain);
-    } else {
-      setFiltered(
-        DestinationMain.filter((opt) =>
-          opt?.dest_default_name.toLowerCase().includes(search.toLowerCase())
-        )
-      );
+  /**
+   * Filters destinations whenever
+   * the search text or destination list changes.
+   */
+  /**
+   * Returns destinations that match
+   * the current search text.
+   */
+  const filtered = useMemo(() => {
+    if (!search.trim()) {
+      return DestinationMain;
     }
+
+    return DestinationMain.filter((destination) =>
+      destination.dest_default_name
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+    );
   }, [search, DestinationMain]);
-  // Handle selection
-  const handleSelect = (item) => {
-    setSelected(item);
-    handleChange(item);
-    setShow(false);
-  };
+  // useEffect(() => {
+  //   // Show all destinations when the search box is empty.
+  //   if (search.trim() === "") {
+  //     setFiltered(DestinationMain);
+  //   } else {
+  //     // Filter destinations by name.
+  //     setFiltered(
+  //       DestinationMain.filter((opt) =>
+  //         opt?.dest_default_name.toLowerCase().includes(search.toLowerCase()),
+  //       ),
+  //     );
+  //   }
+  // }, [search, DestinationMain]);
+  /**
+   * Handles destination selection.
+   *
+   * Updates the selected destination,
+   * notifies the parent component,
+   * and closes the dropdown.
+   *
+   * @param {Object} item Selected destination.
+   */
+  // const handleSelect = (item) => {
+  //   setSelected(item);
+  //   handleChange(item);
+  //   setShow(false);
+  // };
+  const handleSelect = useCallback(
+    (destination) => {
+      setSelected(destination);
+      handleChange(destination);
+      setShow(false);
+    },
+    [handleChange],
+  );
+  /**
+   * Closes the dropdown when the user
+   * clicks anywhere outside the component.
+   */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {

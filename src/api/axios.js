@@ -1,7 +1,5 @@
 import axios from "axios";
-//import { store } from "../redux/store"; // your redux store
 import { logout } from "../slices/AuthSlice"; // your auth slice action
-// import { useNavigate } from "react-router-dom";
 import { navigate } from "../helper/navigate";
 import {
   getAccessToken,
@@ -37,7 +35,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 let isRefreshing = false;
@@ -108,7 +106,7 @@ api.interceptors.response.use(
         const newRefesh = refreshResponse?.data?.user?.refreshToken;
         localStorage.setItem(
           "user",
-          JSON.stringify(refreshResponse?.data?.user)
+          JSON.stringify(refreshResponse?.data?.user),
         );
         processQueue(null, newToken);
 
@@ -128,7 +126,7 @@ api.interceptors.response.use(
 
     // Other errors
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

@@ -1,5 +1,20 @@
+/**
+ * DestinationComp Component
+ *
+ * Manages destination records and their translations.
+ *
+ * Features:
+ * - Create new destinations
+ * - Update existing destinations
+ * - Soft delete destinations
+ * - Manage destination translations
+ * - Display hierarchical destinations
+ * - Validate destination route (slug)
+ * - Expand/Collapse translations
+ */
+
 import { useDispatch, useSelector } from "react-redux";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   GetDestinations,
   SaveMainDestination,
@@ -26,21 +41,56 @@ import { FiRefreshCcw } from "react-icons/fi";
 import { FaX } from "react-icons/fa6";
 function DestinationComp() {
   const dispatch = useDispatch();
+  // Destination data retrieved from Redux store
   const { destinations, loading, error, DestinationMain } = useSelector(
-    (state) => state.destinations
+    (state) => state.destinations,
   );
+  // Tracks whether the route field has been touched
   const [touched, setTouched] = useState(false);
+
+  // Controls visibility of the add/edit form
   const [filterExpanded, setFilterExpanded] = useState(false);
+
+  // Controls translation modal visibility
   const [showTranslationModal, setShowTranslationModal] = useState(false);
+
+  // Currently selected destination
   const [currentMainDest, setCurrentMainDest] = useState(null);
+
+  // Reserved for image management
   const [showImageModal, setShowImageModal] = useState(false);
-  const [currentTranslation, setCurrentTranslation] = useState(null); // State for current translation being edited
-  const [expandedRows, setExpandedRows] = useState([]); // State for expanded rows (translations)
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
-  const [isUpdate, setIsUpdate] = useState(0);
+
+  // Translation currently being created or edited
+  const [currentTranslation, setCurrentTranslation] = useState(null);
+
+  // Expanded destination rows
+  const [expandedRows, setExpandedRows] = useState([]);
+
+  // Popup notification state
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("alert");
+
+  // Determines whether the form is editing an existing destination
+  const [isUpdate, setIsUpdate] = useState(false);
+
+  // Indicates whether the route field has been modified
   const [dirty, setDirty] = useState(false);
+  const initialFormData = {
+    id: 0,
+    dest_default_name: "",
+    dest_code: "",
+    active: true,
+    country_code: "",
+    route: "",
+    parent_id: 0,
+    leaf: false,
+    order: 1,
+  };
+  /**
+   * Destination form model.
+   * Used for both Add and Update operations.
+   */
   const [formData, setFormData] = useState({
     id: 0,
     dest_default_name: "",
@@ -52,23 +102,67 @@ function DestinationComp() {
     leaf: false,
     order: 1,
   }); // Form state for save Destinations
-
+  /**
+   * Valid route format:
+   * - Letters
+   * - Numbers
+   * - Hyphens
+   * - No leading/trailing hyphen
+   * - No consecutive hyphens
+   */
   const slugRegex = /^(?!-)(?!.*--)[a-zA-Z0-9-]+(?<!-)$/;
   const isValidSlug =
     formData.route.length === 0 || slugRegex.test(formData.route);
-  // Handle input changes
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-  // Fetch services and packages on component mount
-  useEffect(() => {
-    let data = { country_code: "", lang_code: "en", currency_code: "" };
-    dispatch(GetDestinations(data));
-    dispatch(GetDestination_Mains(false));
+  /**
+   * Updates destination form values when
+   * an input field changes.
+   *
+   */
+  // const handleInputChange = (e) => {
+  //   setFormData({
+  //     ...formData,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }, []);
+  /**
+   * Loads destinations and parent destinations
+   * when the component is first rendered.
+   */
+  const loadDestinations = useCallback(() => {
+    dispatch(
+      GetDestinations({
+        country_code: "",
+        lang_code: "en",
+        currency_code: "",
+      }),
+    );
   }, [dispatch]);
+  useEffect(() => {
+    loadDestinations();
+    dispatch(GetDestination_Mains(false));
+  }, [dispatch, loadDestinations]);
+
+  /**
+   * Creates a new destination or updates
+   * an existing one.
+   *
+   * On success:
+   * - Reset form
+   * - Refresh destination list
+   * - Collapse form
+   *
+   * On failure:
+   * - Display validation errors
+   */
   const onSubmit = (e) => {
     e.preventDefault();
     setTouched(true);
@@ -99,21 +193,23 @@ function DestinationComp() {
       });
     }
   };
-  const resetForm = () => {
-    setFormData({
-      id: 0,
-      dest_default_name: "",
-      dest_code: "",
-      active: true,
-      country_code: "",
-      route: "",
-      parent_id: 0,
-      leaf: false,
-      order: 1,
-    });
+
+  /**
+   * Restores the destination form
+   * to its default values.
+   */
+  const resetForm = useCallback(() => {
+    setFormData(initialFormData);
     setIsUpdate(false);
-  };
-  // Handle editing a destination
+    setTouched(false);
+    setDirty(false);
+  }, []);
+  /**
+   * Loads the selected destination
+   * into the form for editing.
+   *
+   * @param {Object} dest Destination object
+   */
   const handleEdit = async (dest) => {
     setIsUpdate(true);
     setFilterExpanded(true);
@@ -130,7 +226,12 @@ function DestinationComp() {
     });
   };
 
-  // Handle deleting a destination
+  /**
+   * Soft deletes a destination
+   * by setting Active = false.
+   *
+   * @param {Object} dest Destination object
+   */
   const handleDeleteClick = (dest) => {
     let row = {
       id: dest.destination_id,
@@ -166,7 +267,12 @@ function DestinationComp() {
     });
   };
 
-  // Handle adding a translation
+  /**
+   * Opens the translation modal
+   * for creating a new translation.
+   *
+   * @param {Object} dest Destination object
+   */
   const handleAddTranslation = (dest) => {
     setCurrentMainDest(dest);
     setCurrentTranslation({
@@ -180,7 +286,11 @@ function DestinationComp() {
     setShowTranslationModal(true);
   };
 
-  // Handle deleting a translation
+  /**
+   * Soft deletes a destination translation.
+   *
+   * @param {Object} translation Translation object
+   */
   const handleDeleteTranslationClick = (translation) => {
     let row = {
       id: translation.id,
@@ -202,24 +312,30 @@ function DestinationComp() {
     });
   };
 
+  /**
+   * Expands or collapses
+   * the translations section
+   * for the selected destination.
+   *
+   * @param {number} id Destination id
+   */
   const toggleRow = (id) => {
     const currentExpandedRows = [...expandedRows];
     const isRowExpanded = currentExpandedRows.includes(id);
     setExpandedRows(
       isRowExpanded
         ? currentExpandedRows.filter((rowId) => rowId !== id)
-        : [...currentExpandedRows, id]
+        : [...currentExpandedRows, id],
     );
   };
 
-  // Render translation header row
+  /**
+   * Renders the table header
+   * for destination translations.
+   */
   const renderTranslationHeader = () => {
     return (
       <tr className="translation-header">
-        {/* <th>Language</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Actions</th> */}
         <td colSpan="8">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex" style={{ width: "85%" }}>
@@ -242,33 +358,15 @@ function DestinationComp() {
     );
   };
 
-  // Render translation row
+  /**
+   * Renders a single translation row
+   * with edit and delete actions.
+   *
+   * @param {Object} translation Translation object
+   */
   const renderTranslationRow = (translation) => {
     return (
       <tr key={`translation-${translation.id}`} className="translation-row">
-        {/* <td>{translation.lang_code}</td>
-        <td>{translation.dest_name}</td>
-        <td>{translation.dest_description}</td>
-        <td>
-          {" "}
-          <button
-            className="btn btn-sm btn-warning me-2 yellow-btn"
-            onClick={() => {
-              setCurrentTranslation(translation);
-              setShowTranslationModal(true);
-            }}
-            title="Edit Translation"
-          >
-            <FaEdit size={12} />
-          </button>
-          <button
-            className="btn btn-sm btn-danger"
-            onClick={() => handleDeleteTranslationClick(translation)}
-            title="Delete Translation"
-          >
-            <FaTrash size={12} />
-          </button>
-        </td> */}
         {translation.lang_code != null ? (
           <td colSpan="8">
             <div className="d-flex justify-content-between align-items-center">
@@ -308,6 +406,8 @@ function DestinationComp() {
       </tr>
     );
   };
+  // Determines whether the route validation error
+  // should be displayed.
   const shouldShowError =
     (dirty || touched) && !isValidSlug && formData.route?.length > 0;
   return (
@@ -589,7 +689,7 @@ function DestinationComp() {
                       <>
                         {renderTranslationHeader()}
                         {dest.translations?.map((translation) =>
-                          renderTranslationRow(translation)
+                          renderTranslationRow(translation),
                         )}
                       </>
                     )}

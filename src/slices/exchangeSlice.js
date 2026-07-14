@@ -16,13 +16,13 @@ export const GetExchangeRates = createAsyncThunk(
   async (rateDate, { rejectWithValue }) => {
     try {
       const response = await api.post(
-        `/TravelAdmin/GetExchangeRates?rateDate=${rateDate}`
+        `/TravelAdmin/GetExchangeRates?rateDate=${rateDate}`,
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const SaveExchangeRate = createAsyncThunk(
@@ -41,7 +41,7 @@ export const SaveExchangeRate = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const GetCompanySetting = createAsyncThunk(
@@ -49,15 +49,15 @@ export const GetCompanySetting = createAsyncThunk(
   async (companyId = 1, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${BASE_URL}/TravelAdmin/Get_CompanySetting?company_id=${companyId}`, 
-        {}, 
-        { headers: NonAuthHeaders() }
+        `${BASE_URL}/TravelAdmin/Get_CompanySetting?company_id=${companyId}`,
+        {},
+        { headers: NonAuthHeaders() },
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 const exchangeSlice = createSlice({
@@ -73,7 +73,9 @@ const exchangeSlice = createSlice({
   reducers: {
     updateRate(state, action) {
       const { currency_code, rate } = action.payload;
-      const item = state.rates.find((row) => row.currency_code === currency_code);
+      const item = state.rates.find(
+        (row) => row.currency_code === currency_code,
+      );
       if (item) {
         item.rate = Number(rate);
       }
@@ -100,7 +102,9 @@ const exchangeSlice = createSlice({
       .addCase(GetExchangeRates.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.payload?.msg || action.payload || "Failed to load exchange rates.";
+          action.payload?.msg ||
+          action.payload ||
+          "Failed to load exchange rates.";
       })
       .addCase(SaveExchangeRate.pending, (state) => {
         state.saving = true;
@@ -118,7 +122,9 @@ const exchangeSlice = createSlice({
       .addCase(SaveExchangeRate.rejected, (state, action) => {
         state.saving = false;
         state.error =
-          action.payload?.msg || action.payload || "Unable to save exchange rates.";
+          action.payload?.msg ||
+          action.payload ||
+          "Unable to save exchange rates.";
       })
       .addCase(GetCompanySetting.pending, (state) => {
         state.error = null;
@@ -128,7 +134,8 @@ const exchangeSlice = createSlice({
       })
       .addCase(GetCompanySetting.rejected, (state, action) => {
         state.error =
-          action.payload?.msg || action.payload ||
+          action.payload?.msg ||
+          action.payload ||
           "Unable to load company settings.";
       });
   },

@@ -1,3 +1,34 @@
+/**
+ * TranslationTab Component
+ *
+ * Purpose:
+ * Provides a language-specific form for creating, updating, and deleting
+ * trip translations. Each tab represents a single language and allows
+ * administrators to manage all translated trip content including:
+ * - Trip name
+ * - Description
+ * - Cancellation policy
+ * - Details
+ * - Highlights
+ * - Included services
+ * - Excluded services
+ * - Important information
+ *
+ * Features:
+ * - Automatically populates the form when a translation exists.
+ * - Supports creating new translations.
+ * - Supports updating existing translations.
+ * - Supports deleting translations.
+ * - Uses a rich text editor for long-form content.
+ * - Displays loading indicator during API requests.
+ * - Shows success/error popup messages.
+ *
+ * Props:
+ * @param {Object|null} data - Existing translation data. Null when creating a new translation.
+ * @param {number} trip_id - Trip identifier.
+ * @param {string} lang_code - Language code of the current translation (en, de, ru, etc.).
+ * @param {Function} RefreshList - Callback used to reload all translations after changes.
+ */
 import React, { useEffect, useState } from "react";
 import { SaveTripTranslation } from "../../slices/tripSlice";
 import { FaPlus, FaTrash, FaUpload } from "react-icons/fa";
@@ -7,11 +38,18 @@ import { useSelector, useDispatch } from "react-redux";
 import LoadingPage from "../Loader/LoadingPage";
 import PopUp from "../Shared/popup/PopUp";
 function TranslationTab({ data, trip_id, lang_code, RefreshList }) {
+  // Redux dispatcher for API actions
   const dispatch = useDispatch();
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
+
+  // Popup state
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("alert");
+
+  // Indicates whether the current record is being updated
   const [isUpdate, setIsUpdate] = useState(false);
+
+  // Translation form model
   const [formData, setFormData] = useState({
     id: 0,
     trip_id: trip_id,
@@ -83,8 +121,11 @@ function TranslationTab({ data, trip_id, lang_code, RefreshList }) {
     };
   }, [data]);
 
+  // Save, update, or delete a translation
+
   const saveData = (e, isDelete) => {
     e.preventDefault();
+    // Mark whether this request is a delete operation
     formData["delete"] = isDelete;
     formData["lang_code"] = lang_code;
     dispatch(SaveTripTranslation(formData)).then((result) => {

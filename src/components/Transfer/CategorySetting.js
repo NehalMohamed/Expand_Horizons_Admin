@@ -1,32 +1,31 @@
+/**
+ * CategorySetting Component
+ *
+ * Manages Transfer Categories.
+ *
+ * Features:
+ * - Display transfer categories
+ * - Search categories
+ * - Add new category
+ * - Edit existing category
+ * - Delete category
+ * - Assign pricing and capacity information
+ */
 import { useDispatch, useSelector } from "react-redux";
 import React, { useState, useEffect } from "react";
 import {
   GetTransfer_Categories,
   SaveTransferCategory,
 } from "../../slices/tripSlice";
-import {
-  Form,
-  Row,
-  Col,
-  Button,
-  FormCheck,
-  Table,
-  InputGroup,
-} from "react-bootstrap";
+import { Form, Row, Col, Button, Table } from "react-bootstrap";
 import {
   FaPlus,
   FaTrash,
   FaChevronUp,
   FaEdit,
-  FaGlobe,
   FaChevronDown,
-  FaImage,
-  FaCheck,
   FaSearch,
   FaUpload,
-  FaTimes,
-  FaUndo,
-  FaDollarSign,
 } from "react-icons/fa";
 import { FiRefreshCcw } from "react-icons/fi";
 import PopUp from "../Shared/popup/PopUp";
@@ -34,12 +33,37 @@ import LoadingPage from "../Loader/LoadingPage";
 import CurrencySelect from "../Shared/MainSetting/CurrencySelect";
 function CategorySetting() {
   const dispatch = useDispatch();
-  const [searchTerm, setSearchTerm] = useState(""); // State for search functionality
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
+  // Search keyword used to filter transfer categories.
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Controls popup visibility.
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Popup message.
+  const [popupMessage, setPopupMessage] = useState("");
+
+  // Popup message type (success, error, alert).
+  const [popupType, setPopupType] = useState("alert");
+
+  // Controls Add/Edit form visibility.
   const [filterExpanded, setFilterExpanded] = useState(false);
+
+  // Determines whether the form is editing an existing category.
   const [isUpdate, setIsUpdate] = useState(false);
+  const initialFormData = {
+    id: 0,
+    category_code: "",
+    min_price: 0,
+    max_price: 0,
+    currency_code: "",
+    min_capacity: 0,
+    max_capacity: 0,
+    category_name: "",
+    delete: false,
+    child_price: 0,
+    notes: "",
+  };
+  // Transfer category form model.
   const [formData, setFormData] = useState({
     id: 0,
     category_code: "",
@@ -54,52 +78,42 @@ function CategorySetting() {
     notes: "",
   });
   const { loading, error, TransferCategories } = useSelector(
-    (state) => state.trips
+    (state) => state.trips,
   );
   useEffect(() => {
     dispatch(GetTransfer_Categories());
     return () => {};
   }, [dispatch]);
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
+  /**
+   * Clears the form and switches
+   * back to Add mode.
+   */
   const resetForm = () => {
     setIsUpdate(false);
-    setFormData({
-      id: 0,
-      category_code: "",
-      min_price: 0,
-      max_price: 0,
-      currency_code: "",
-      min_capacity: 0,
-      max_capacity: 0,
-      category_name: "",
-      delete: false,
-      child_price: 0,
-      notes: "",
-    });
+    setFormData(initialFormData);
   };
+  /**
+   * Creates a new transfer category
+   * or updates an existing one.
+   *
+   * After saving successfully:
+   * - Clears the form
+   * - Reloads categories
+   *
+   * @param {React.FormEvent<HTMLFormElement>} event
+   */
   const onSubmit = (e) => {
     e.preventDefault();
     dispatch(SaveTransferCategory(formData)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        setFormData({
-          id: 0,
-          category_code: "",
-          min_price: 0,
-          max_price: 0,
-          currency_code: "",
-          min_capacity: 0,
-          max_capacity: 0,
-          category_name: "",
-          delete: false,
-          child_price: 0,
-          notes: "",
-        });
+        setFormData(initialFormData);
         setIsUpdate(false);
         dispatch(GetTransfer_Categories());
       } else {
@@ -108,6 +122,12 @@ function CategorySetting() {
       }
     });
   };
+  /**
+   * Loads an existing transfer category
+   * into the form for editing.
+   *
+   * @param {Object} transfer Selected category.
+   */
   const handleEdit = (transfer) => {
     setIsUpdate(true);
     setFilterExpanded(true);
@@ -125,6 +145,15 @@ function CategorySetting() {
       notes: transfer.notes,
     });
   };
+
+  /**
+   * Deletes the selected transfer category.
+   *
+   * The API performs a logical delete
+   * using the delete flag.
+   *
+   * @param {Object} transfer Category to remove.
+   */
   const handleDelete = (transfer) => {
     const data = {
       id: transfer.id,
@@ -377,7 +406,7 @@ function CategorySetting() {
               TransferCategories.filter((item) =>
                 item.category_name
                   .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
+                  .includes(searchTerm.toLowerCase()),
               ).map((transfer, index) => (
                 <tr key={index}>
                   <td>{transfer.category_code}</td>

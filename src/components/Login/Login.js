@@ -1,3 +1,16 @@
+/**
+ * Login Component
+ *
+ * Authenticates users into the administration panel.
+ *
+ * Features:
+ * - Validate user credentials
+ * - Authenticate using Redux
+ * - Display validation errors
+ * - Show loading indicator while signing in
+ * - Display success or error messages
+ * - Redirect to dashboard after successful login
+ */
 import React, { useState, useEffect } from "react";
 import { Button, Form, Col, Row, FloatingLabel } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -9,10 +22,17 @@ import "./Login.scss";
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [errorsLst, seterrorsLst] = useState({});
-  const [validated, setvalidated] = useState(false);
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [formData, setformData] = useState({
+  // Stores validation errors for form fields
+  const [errorsLst, setErrorsLst] = useState({});
+
+  // Indicates whether the form has been validated
+  const [validated, setValidated] = useState(false);
+
+  // Controls popup notification visibility
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Login form model
+  const [formData, setFormData] = useState({
     FirstName: "",
     LastName: "",
     email: "",
@@ -21,20 +41,30 @@ function Login() {
     Role: "User",
     sendOffers: false,
   });
+  // Authentication status from Redux store
 
   const { loading, success, message } = useSelector((state) => state.auth);
-  //validate form inputs
+  /**
+   * Validates login form inputs.
+   *
+   * Validation Rules:
+   * - Email must be valid
+   * - Password must contain at least 6 characters
+   *
+   * @returns {boolean} True if validation succeeds.
+   */
   const validate = () => {
+    // Validate email format.
     if (!/^\S+@\S+\.\S+$/.test(formData.email) || formData.email.trim() == "") {
-      seterrorsLst({
+      setErrorsLst({
         ...errorsLst,
         email: "Please enter a valid email address.",
       });
       return false;
     }
-
+    // Validate password length.
     if (formData.password.trim() == "" || formData.password.length < 6) {
-      seterrorsLst({
+      setErrorsLst({
         ...errorsLst,
         password: "Password must be at least 6 characters long.",
       });
@@ -43,6 +73,18 @@ function Login() {
 
     return true;
   };
+
+  /**
+   * Authenticates the user.
+   *
+   * On success:
+   * - Redirects to the dashboard.
+   *
+   * On failure:
+   * - Displays an error popup.
+   *
+   * @param {React.FormEvent<HTMLFormElement>} event
+   */
   const signin = (event) => {
     event.preventDefault();
     // validation
@@ -67,26 +109,33 @@ function Login() {
       });
     }
   };
+  /**
+   * Updates login form values.
+   *
+   * Also clears any previous validation errors.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
   const fillFormData = (e) => {
-    setvalidated(false);
-    seterrorsLst({});
-    setformData({
-      ...formData,
+    setValidated(false);
+    setErrorsLst({});
+    setFormData((previous) => ({
+      ...previous,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
   return (
     <section className="centerSection">
       <div className="login_page">
-         <div className="d-flex justify-content-center align-items-center logo-div">
-                    <img 
-          src="/logo.png" 
-          alt="expand horizons"
-          className="logo-img" 
-          loading="lazy" 
-          decoding="async" 
+        <div className="d-flex justify-content-center align-items-center logo-div">
+          <img
+            src="/logo.png"
+            alt="expand horizons"
+            className="logo-img"
+            loading="lazy"
+            decoding="async"
           />
-          </div>
+        </div>
         {/* <div className="form_title">
           <h4 className="title">Log in</h4>
         </div> */}

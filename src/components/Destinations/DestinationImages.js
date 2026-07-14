@@ -1,4 +1,18 @@
-import React, { useEffect, useState } from "react";
+/**
+ * DestinationImages Component
+ *
+ * Manages destination image galleries.
+ *
+ * Features:
+ * - Select a destination
+ * - Display destination images
+ * - Upload one or more images
+ * - Automatically rename uploaded images
+ * - Set a default image
+ * - Remove existing images
+ */
+
+import React, { useEffect, useState, useCallback } from "react";
 import {
   GetImgsByDestination,
   UpdateDestinationImage,
@@ -12,32 +26,67 @@ import PopUp from "../Shared/popup/PopUp";
 import ImageGallery from "../Shared/ImageGallery/ImageGallery";
 import DestinationDropDown from "./DestinationDropDown";
 function DestinationImages() {
-  const [destination_id, setdestination_id] = useState(0);
-  const [destination_route, setdestination_route] = useState(0);
   const dispatch = useDispatch();
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
+  // Currently selected destination identifier
+  const [destination_id, setDestinationId] = useState(0);
+
+  // Selected destination route used when generating image file names
+  const [destination_route, setDestinationRoute] = useState("");
+
+  // Controls popup notification visibility
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Popup message content
+  const [popupMessage, setPopupMessage] = useState("");
+
+  // Popup notification type (success, error, alert)
+  const [popupType, setPopupType] = useState("alert");
+
+  // Images belonging to the selected destination
   const [images, setImages] = useState([]);
+  // Loading state while images are retrieved or updated
   const { loading } = useSelector((state) => state.destinations);
 
   // useEffect(() => {
   //   dispatch(GetDestination_Mains(false));
   //   return () => {};
   // }, [dispatch]);
-
+  /**
+   * Loads images for the selected destination.
+   *
+   * Updates:
+   * - Selected destination id
+   * - Destination route
+   * - Destination image gallery
+   *
+   * @param {Object} destination Selected destination.
+   */
   const handleInputChange = (dest) => {
     // const id = e.target.value;
-    setdestination_id(dest?.id);
-    setdestination_route(dest?.route);
-    dispatch(GetImgsByDestination(dest?.id)).then((result) => {
-      if (result.payload) {
-        setImages(result.payload);
-      }
-    });
-  };
+    setDestinationId(dest?.id);
+    setDestinationRoute(dest?.route);
+    // Retrieve all images belonging to the selected destination.
 
-  const RenameFileFn = (file) => {
+    loadDestinationImages(dest?.id);
+    // dispatch(GetImgsByDestination(dest?.id)).then((result) => {
+    //   if (result.payload) {
+    //     setImages(result.payload);
+    //   }
+    // });
+  };
+  /**
+   * Generates a unique image file name before upload.
+   *
+   * File format:
+   * destinationRoute_img_randomString.extension
+   *
+   * Example:
+   * hurghada_img_ab12cd34.jpg
+   *
+   * @param {File} file Uploaded image.
+   * @returns {string} Generated file name.
+   */
+  const renameFileFn = (file) => {
     // ✅ Generate custom filename: triproute_img_<random>.ext
     const ext = file.name.split(".").pop();
     const randomId = Math.random().toString(36).substring(2, 10); // random string
@@ -45,8 +94,20 @@ function DestinationImages() {
     const newFileName = `${destination_route}_img_${randomId}.${ext}`;
     return newFileName;
   };
-  // Handle file input
+  /**
+   * Uploads one or more images for the selected destination.
+   *
+   * Steps:
+   * - Read selected files
+   * - Generate custom file names
+   * - Build FormData request
+   * - Upload images
+   * - Refresh gallery after successful upload
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
   const handleUpload = (e) => {
+    // Convert FileList into an array.
     const files = Array.from(e.target.files);
     const newImages = files.map((file) => ({
       id: URL.createObjectURL(file),
@@ -60,20 +121,18 @@ function DestinationImages() {
     // files.forEach((img) => {
     //   formData.append("imgs", img); // "Files" matches API param name
     // });
+    // Rename each uploaded file before sending it to the server.
     files.forEach((file) => {
-      const newFileName = RenameFileFn(file);
+      const newFileName = renameFileFn(file);
       console.log("newFileName ", newFileName);
       const renamedFile = new File([file], newFileName, { type: file.type });
       formData.append("imgs", renamedFile); // "Files" matches API param name
     });
+    // Reload the gallery after a successful upload.
     dispatch(saveDestinationImage(formData)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        dispatch(GetImgsByDestination(destination_id)).then((result) => {
-          if (result.payload) {
-            setImages(result.payload);
-          }
-        });
+        loadDestinationImages(destination_id);
       } else {
         setPopupType("error");
         setShowPopup(true);
@@ -82,8 +141,16 @@ function DestinationImages() {
     });
     e.target.value = "";
   };
-  // Remove image
+  /**
+   * Removes an image from the selected destination.
+   *
+   * Performs a soft delete and refreshes
+   * the image gallery afterward.
+   *
+   * @param {Object} image Image to remove.
+   */
   const handleRemove = (img) => {
+    // Request payload for image deletion.
     let data = {
       id: img.id,
       destination_id: img.destination_id,
@@ -95,11 +162,7 @@ function DestinationImages() {
     dispatch(UpdateDestinationImage(data)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        dispatch(GetImgsByDestination(destination_id)).then((result) => {
-          if (result.payload) {
-            setImages(result.payload);
-          }
-        });
+        loadDestinationImages(destination_id);
       } else {
         setPopupType("error");
         setShowPopup(true);
@@ -108,7 +171,14 @@ function DestinationImages() {
     });
   };
 
-  // Mark image as default
+  /**
+   * Marks the selected image as the default image
+   * for the current destination.
+   *
+   * Only one image should be marked as default.
+   *
+   * @param {Object} image Image to make default.
+   */
   const handleSetDefault = (img) => {
     let data = {
       id: img.id,
@@ -121,11 +191,7 @@ function DestinationImages() {
     dispatch(UpdateDestinationImage(data)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        dispatch(GetImgsByDestination(destination_id)).then((result) => {
-          if (result.payload) {
-            setImages(result.payload);
-          }
-        });
+        loadDestinationImages(destination_id);
       } else {
         setPopupType("error");
         setShowPopup(true);
@@ -133,6 +199,22 @@ function DestinationImages() {
       }
     });
   };
+
+  /**
+   * Reloads all images for the currently selected destination.
+   *
+   * @param {number} destinationId Destination identifier.
+   */
+  const loadDestinationImages = useCallback(
+    (destinationId) => {
+      dispatch(GetImgsByDestination(destinationId)).then((result) => {
+        if (result.payload) {
+          setImages(result.payload);
+        }
+      });
+    },
+    [dispatch],
+  );
   return (
     <section className="layout_section">
       {" "}

@@ -1,3 +1,23 @@
+/**
+ * TripComp Component
+ *
+ * Purpose:
+ * Manages the main trip records used throughout the booking system.
+ *
+ * Features:
+ * - Create new trips.
+ * - Update existing trips.
+ * - Activate/Deactivate trips.
+ * - Search trips by name.
+ * - Filter trips by category.
+ * - Validate SEO-friendly route (slug).
+ * - Load destinations and trip categories.
+ * - Display all trips in a searchable table.
+ *
+ * This component only manages the main trip information.
+ * Trip translations, pricing, images, schedules, and other
+ * trip details are maintained in their respective modules.
+ */
 import { useDispatch, useSelector } from "react-redux";
 import React, { useState, useEffect } from "react";
 import {
@@ -43,18 +63,34 @@ import { useNavigate } from "react-router-dom";
 function TripComp() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(""); // State for search functionality
+  // Search by trip name
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter trips by category
   const [SearchCategory, setSearchCategory] = useState("");
+
+  // Selected destination filter
   const [destination_id, setDestinationId] = useState(0);
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
+
+  // Popup state
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState("alert");
+
+  // Controls Add/Edit panel visibility
   const [filterExpanded, setFilterExpanded] = useState(false);
+
+  // Indicates whether the form is editing an existing trip
   const [isUpdate, setIsUpdate] = useState(false);
+
+  // Tracks currently selected trip
   const [activeTrip, setActiveTrip] = useState({});
-  const [isChecked, setIsChecked] = useState({});
+
+  // Validation helpers
   const [dirty, setDirty] = useState(false);
   const [touched, setTouched] = useState(false);
+
+  // Trip form model
   const [formData, setFormData] = useState({
     id: 0,
     trip_default_name: "",
@@ -73,9 +109,13 @@ function TripComp() {
     is_comm_soon: false,
     trip_code_auto: "",
   });
+  // Regular expression used to validate SEO-friendly routes (slugs)
   const slugRegex = /^(?!-)(?!.*--)[a-zA-Z0-9-]+(?<!-)$/;
+
+  // Route is valid if empty or matches slug rules
   const isValidSlug =
     formData.route?.length === 0 || slugRegex.test(formData.route);
+  // Get trip data and lookup lists from Redux store
   const { TripsMain, loading, error, TripCategories, TransferCategories } =
     useSelector((state) => state.trips);
   const { DestinationMain } = useSelector((state) => state.destinations);
@@ -202,6 +242,7 @@ function TripComp() {
       }
     });
   };
+  // Determines when the route validation message should appear
   const shouldShowError =
     (dirty || touched) && !isValidSlug && formData.route?.length > 0;
   return (
@@ -316,30 +357,6 @@ function TripComp() {
             </Col>
           </Row>
           <Row>
-            {/* {formData.trip_type == 2 ? (
-              <Col md={2}>
-                {" "}
-                <Form.Group>
-                  <Form.Label>Transfer Category</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="transfer_category_id"
-                    onChange={handleInputChange}
-                    value={formData.transfer_category_id}
-                    required
-                    className="formInput"
-                  >
-                    <option value="">select transfer</option>
-                    {TransferCategories &&
-                      TransferCategories?.map((ts, index) => (
-                        <option key={index} value={ts.id}>
-                          {ts.category_code} - {ts.category_name}
-                        </option>
-                      ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-            ) : null} */}
             <Col md={3}>
               {" "}
               <Form.Group className="mb-3">
@@ -513,25 +530,6 @@ function TripComp() {
               </Col>
             )}
           </Row>
-          {/* <Row>
-            <Col xs={12} md={{ span: 4, offset: 8 }}>
-              <Button
-                variant="primary"
-                type="submit"
-                className="w-100 mt-30 darkBlue-Btn FullWidthBtn"
-              >
-                {!isUpdate ? (
-                  <>
-                    <FaPlus className="me-1" /> Add
-                  </>
-                ) : (
-                  <>
-                    <FaUpload className="me-1" /> Update
-                  </>
-                )}
-              </Button>
-            </Col>
-          </Row> */}
         </Form>
       )}
       <hr />
@@ -552,8 +550,6 @@ function TripComp() {
                 <th>route</th>
                 <th>
                   Category
-                  {/* <InputGroup className="filterInput"> */}
-                  {/* <Form.Label>Destination</Form.Label> */}
                   <Form.Control
                     as="select"
                     name="trip_type"
@@ -570,10 +566,6 @@ function TripComp() {
                         </option>
                       ))}
                   </Form.Control>
-                  {/* <Button onClick={()=> setSearchCategory()}>
-                    <FaSearch />
-                  </Button> */}
-                  {/* </InputGroup> */}
                 </th>
                 <th>Release Days</th>
                 <th>Order</th>
@@ -588,28 +580,12 @@ function TripComp() {
                     .includes(searchTerm.toLowerCase()) &&
                   item.trip_type
                     ?.toString()
-                    .includes(SearchCategory?.toString())
+                    .includes(SearchCategory?.toString()),
               ).map((trip, index) => (
                 <tr
                   key={index}
                   className={trip.active ? "active-row" : "inactive-row"}
                 >
-                  {/* <td>
-                    {" "}
-                    <Form.Group className="mb-3" controlId="packageName">
-                      <FormCheck
-                        type="checkbox"
-                        id="isChecked"
-                        label=""
-                        name="isChecked"
-                        checked={isChecked}
-                        onChange={(e) => {
-                          setActiveTrip(trip);
-                          setIsChecked(e.target.checked);
-                        }}
-                      />
-                    </Form.Group>
-                  </td> */}
                   <td>{trip.trip_code}</td>
                   <td>{trip.trip_default_name}</td>
                   <td>{trip.trip_duration}</td>
@@ -645,15 +621,7 @@ function TripComp() {
                   </td>
                   <td>{trip.release_days}</td>
                   <td>{trip.trip_order}</td>
-                  {/* {trip.trip_type == 2 ? (
-                    <td>
-                      {
-                        TransferCategories.filter(
-                          (f) => f.id == trip.transfer_category_id
-                        )[0]?.category_name
-                      }
-                    </td>
-                  ) : null} */}
+
                   <td>
                     {" "}
                     {trip.active && (
@@ -683,20 +651,6 @@ function TripComp() {
                         <FaUndo />
                       </button>
                     )}
-                    {/* <button
-                      className="btn btn-sm  ms-2 purble-btn action_btn"
-                      // onClick={() => handleAddImage(dest)}
-                      title="Add Image"
-                    >
-                      <FaImage />
-                    </button>
-                    <button
-                      className="btn btn-sm action_btn dark-purble-btn"
-                      //onClick={() => handleAddTranslation(dest)}
-                      title="Price"
-                    >
-                      <FaDollarSign />
-                    </button> */}
                   </td>
                 </tr>
               ))}

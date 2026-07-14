@@ -231,7 +231,7 @@ a:active {
   //   color: $primary-color !important;
   //   font-weight: bold;
   //   &:hove {
-  //     border-color: #542d72 !important;
+  //     border-color: $primary-color !important;
   //   }
   // }
   .ActiveHeader {
@@ -240,7 +240,7 @@ a:active {
       color: $primary-color;
       font-weight: bold;
       &:hove {
-        border-color: #542d72;
+        border-color: $primary-color;
       }
     }
   }
@@ -253,7 +253,7 @@ a:active {
       // color: $primary-color;
       font-weight: bold;
       &:hove {
-        border-color: #542d72;
+        border-color: $primary-color;
       }
     }
   }
@@ -262,7 +262,7 @@ a:active {
     color: $primary-color;
     font-weight: bold;
     &:hove {
-      border-color: #542d72;
+      border-color: $primary-color;
     }
   }
   .custom_accord {
@@ -357,7 +357,7 @@ a:active {
     td {
       padding: 8px 15px !important;
       border-top: none !important;
-      color: #542d72;
+      color: $primary-color;
       background-color: #f1e6fb;
       text-align: center;
     }

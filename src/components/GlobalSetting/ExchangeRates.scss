@@ -1,3 +1,4 @@
+@import "../../styles/variables";
 .exchange-panel {
   background: #fff;
   border-radius: 14px;
@@ -59,7 +60,7 @@
 }
 
 .exchange-table th {
-  background: #542d72;
+  background: $primary-color;
   color: #eef0f6;
   font-weight: 700;
 }

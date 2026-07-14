@@ -5,11 +5,6 @@ import TripsDropDown from "./TripsDropDown";
 function TripHeader({ title, handleTripChange, isPriceTab }) {
   const [trip_id, setTrip_id] = useState(0);
 
-  // useEffect(() => {
-  //   let data = { destination_id: 0, trip_type: 0 };
-  //   dispatch(GetTrip_Mains(data));
-  //   return () => {};
-  // }, [dispatch]);
   const handleChange = (trip) => {
     // const id = e.target.value;
     setTrip_id(trip?.id);
@@ -45,14 +40,3 @@ function TripHeader({ title, handleTripChange, isPriceTab }) {
 }
 
 export default TripHeader;
-
-{
-  /* {TripsMain &&
-              TripsMain?.filter(
-                (f) => f.trip_type != (isPriceTab == true ? 2 : -1)
-              ).map((trip, index) => (
-                <option key={index} value={trip.id}>
-                  {trip.trip_code} - {trip.trip_default_name}
-                </option>
-              ))} */
-}

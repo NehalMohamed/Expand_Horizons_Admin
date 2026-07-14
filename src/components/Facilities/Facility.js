@@ -1,4 +1,17 @@
-import React, { useState, useEffect } from "react";
+/**
+ * Facility Component
+ *
+ * Manages facility settings and translations.
+ *
+ * Features:
+ * - Create new facilities
+ * - Update existing facilities
+ * - Activate/Deactivate facilities
+ * - Search facilities
+ * - Manage facility translations
+ * - Configure extra pricing options
+ */
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FaSearch,
   FaChevronDown,
@@ -30,21 +43,56 @@ import {
 } from "../../slices/facilitySlice";
 import FacilityTranslationModal from "./FacilityTranslationModal";
 import CurrencySelect from "../Shared/MainSetting/CurrencySelect";
+/**
+ * Available pricing types for extra facilities.
+ */
 const priceTypes = [
   { id: 1, name: "Per Pax" },
   { id: 2, name: "Per Unit" },
 ];
 function Facility() {
   const dispatch = useDispatch();
+  // Facility data retrieved from Redux store
   const { facilities, loading, error } = useSelector((state) => state.facility);
+  // Controls translation modal visibility
   const [showTranslationModal, setShowTranslationModal] = useState(false);
+
+  // Currently selected translation for editing
   const [currentTranslation, setCurrentTranslation] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""); // State for search functionality
-  const [showPopup, setShowPopup] = useState(false); // State for popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State for popup message
-  const [popupType, setPopupType] = useState("alert"); // State for popup type
+
+  // Search keyword used to filter facilities
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Controls popup notification visibility
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Popup notification message
+  const [popupMessage, setPopupMessage] = useState("");
+
+  // Popup notification type (success, error, alert)
+  const [popupType, setPopupType] = useState("alert");
+
+  // Controls visibility of the add/edit form
   const [filterExpanded, setFilterExpanded] = useState(false);
+
+  // Indicates whether the form is editing an existing facility
   const [isUpdate, setIsUpdate] = useState(false);
+  /**
+   * Facility form model.
+   *
+   * Used for both Add and Update operations.
+   */
+  const initialFormData = {
+    facility_code: "",
+    facility_default_name: "",
+    active: true,
+    id: 0,
+    extra_price: 0,
+    is_extra: false,
+    currency_code: "",
+    pricing_type: 1,
+    is_obligatory: false,
+  };
   const [formData, setFormData] = useState({
     facility_code: "",
     facility_default_name: "",
@@ -56,28 +104,47 @@ function Facility() {
     pricing_type: 1,
     is_obligatory: false,
   });
+
+  const filteredFacilities = useMemo(() => {
+    return facilities.filter((facility) =>
+      facility.facility_default_name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()),
+    );
+  }, [facilities, searchTerm]);
+  /**
+   * Updates facility form values whenever
+   * an input field changes.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement>} event
+   */
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const [name, value] = e.target;
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
+  /**
+   * Creates a new facility or updates
+   * an existing one.
+   *
+   * On success:
+   * - Reset the form
+   * - Reload facilities
+   * - Exit edit mode
+   *
+   * On failure:
+   * - Display validation errors
+   *
+   * @param {React.FormEvent<HTMLFormElement>} event
+   */
   const onSubmit = (e) => {
     e.preventDefault();
     dispatch(SaveMainFacility(formData)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        setFormData({
-          facility_code: "",
-          facility_default_name: "",
-          active: true,
-          id: 0,
-          extra_price: 0,
-          is_extra: false,
-          currency_code: "",
-          pricing_type: 1,
-          is_obligatory: false,
-        });
+        setFormData(initialFormData);
         setIsUpdate(false);
         dispatch(GetFacilityWithTranslation());
       } else {
@@ -86,26 +153,36 @@ function Facility() {
       }
     });
   };
+  const loadFacilities = useCallback(() => {
+    dispatch(GetFacilityWithTranslation());
+  }, [dispatch]);
+  /**
+   * Restores the facility form
+   * to its default values.
+   *
+   * @param {React.MouseEvent<HTMLButtonElement>} event
+   */
   const resetForm = (e) => {
     e.preventDefault();
     setIsUpdate(false);
-    setFormData({
-      facility_code: "",
-      facility_default_name: "",
-      active: true,
-      id: 0,
-      extra_price: 0,
-      is_extra: false,
-      currency_code: "",
-      pricing_type: 1,
-      is_obligatory: false,
-    });
+    setFormData(initialFormData);
   };
-  useEffect(() => {
-    dispatch(GetFacilityWithTranslation());
-    return () => {};
-  }, [dispatch]);
 
+  /**
+   * Loads all facilities together with
+   * their translations when the component
+   * is first rendered.
+   */
+  useEffect(() => {
+    loadFacilities();
+    return () => {};
+  }, []);
+  /**
+   * Loads the selected facility
+   * into the edit form.
+   *
+   * @param {Object} facility Selected facility.
+   */
   const handleEdit = (fac) => {
     setIsUpdate(true);
     setFilterExpanded(true);
@@ -121,7 +198,12 @@ function Facility() {
       is_obligatory: fac.is_obligatory,
     });
   };
-
+  /**
+   * Activates or deactivates
+   * a facility.
+   *
+   * @param {Object} facility Selected facility.
+   */
   const handleDeleteClick = (fac) => {
     const data = {
       facility_code: fac.facility_code,
@@ -137,14 +219,21 @@ function Facility() {
     dispatch(SaveMainFacility(data)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        dispatch(GetFacilityWithTranslation());
+        loadFacilities();
       } else {
         setShowPopup(true);
         setPopupMessage(result.payload.errors);
       }
     });
   };
-
+  /**
+   * Removes a facility translation.
+   *
+   * Performs a soft delete by
+   * setting delete = true.
+   *
+   * @param {Object} translation Translation to remove.
+   */
   const handleDeleteTranslation = (trans) => {
     let data = {
       id: trans.id,
@@ -156,7 +245,7 @@ function Facility() {
     };
     dispatch(SaveFacilityTranslation(data)).then((result) => {
       if (result.payload && result.payload.success) {
-        dispatch(GetFacilityWithTranslation());
+        loadFacilities();
         setShowPopup(false);
       } else {
         setShowPopup(true);
@@ -165,6 +254,13 @@ function Facility() {
       }
     });
   };
+
+  /**
+   * Opens the translation dialog
+   * for editing an existing translation.
+   *
+   * @param {Object} translation Translation to edit.
+   */
   const handleEditTranslation = (trans) => {
     setCurrentTranslation({
       id: trans.id,
@@ -176,7 +272,12 @@ function Facility() {
     });
     setShowTranslationModal(true);
   };
-  // Handle adding a translation
+  /**
+   * Opens the translation dialog
+   * for creating a new translation.
+   *
+   * @param {Object} facility Selected facility.
+   */
   const handleAddTranslation = (fac) => {
     setCurrentTranslation({
       id: 0,
@@ -394,110 +495,104 @@ function Facility() {
       <div className="result_list">
         {" "}
         {facilities &&
-          facilities
-            ?.filter((item) =>
-              item.facility_default_name
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
-            )
-            .map((row, index) => (
-              <Accordion key={index}>
-                <Accordion.Item eventKey={index}>
-                  <Accordion.Header
-                    className={
-                      row.active == true
-                        ? "ActiveHeader custom_accord"
-                        : "InActiveHeader custom_accord"
-                    }
-                  >
-                    <div className="d-flex justify-content-between w-100 align-items-center">
-                      <span>
-                        {row.facility_code} - {row.facility_default_name}
-                      </span>
-                      <div>
-                        {" "}
-                        <Button
-                          className="btn btn-sm action_btn dark-purble-btn"
-                          onClick={(e) => {
-                            e.stopPropagation(); // prevent accordion toggle
-                            handleAddTranslation(row);
-                          }}
-                          title="Add Translation"
-                        >
-                          <FaGlobe />
-                        </Button>
-                        <Button
-                          className="btn btn-sm action_btn yellow-btn"
-                          onClick={(e) => {
-                            e.stopPropagation(); // prevent accordion toggle
-                            handleEdit(row);
-                          }}
-                        >
-                          <FaEdit />
-                        </Button>
-                        <Button
-                          className="btn btn-sm action_btn red-btn"
-                          onClick={(e) => {
-                            e.stopPropagation(); // prevent accordion toggle
-                            handleDeleteClick(row);
-                          }}
-                        >
-                          {row.active == true ? <FaTrash /> : <FaUndo />}
-                        </Button>
-                      </div>
+          filteredFacilities?.map((row, index) => (
+            <Accordion key={index}>
+              <Accordion.Item eventKey={index}>
+                <Accordion.Header
+                  className={
+                    row.active == true
+                      ? "ActiveHeader custom_accord"
+                      : "InActiveHeader custom_accord"
+                  }
+                >
+                  <div className="d-flex justify-content-between w-100 align-items-center">
+                    <span>
+                      {row.facility_code} - {row.facility_default_name}
+                    </span>
+                    <div>
+                      {" "}
+                      <Button
+                        className="btn btn-sm action_btn dark-purble-btn"
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent accordion toggle
+                          handleAddTranslation(row);
+                        }}
+                        title="Add Translation"
+                      >
+                        <FaGlobe />
+                      </Button>
+                      <Button
+                        className="btn btn-sm action_btn yellow-btn"
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent accordion toggle
+                          handleEdit(row);
+                        }}
+                      >
+                        <FaEdit />
+                      </Button>
+                      <Button
+                        className="btn btn-sm action_btn red-btn"
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent accordion toggle
+                          handleDeleteClick(row);
+                        }}
+                      >
+                        {row.active == true ? <FaTrash /> : <FaUndo />}
+                      </Button>
                     </div>
-                  </Accordion.Header>
-                  <Accordion.Body>
-                    {row && row.translations.length > 0 ? (
-                      <Table responsive>
-                        <thead>
-                          <tr>
-                            <th>Lang Code</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>actions</th>
+                  </div>
+                </Accordion.Header>
+                <Accordion.Body>
+                  {row && row.translations.length > 0 ? (
+                    <Table responsive>
+                      <thead>
+                        <tr>
+                          <th>Lang Code</th>
+                          <th>Name</th>
+                          <th>Description</th>
+                          <th>actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {row.translations.map((trans, key) => (
+                          <tr key={key}>
+                            <td>{trans.lang_code}</td>
+                            <td>{trans.facility_name}</td>
+                            <td>{trans.facility_desc}</td>
+                            <td>
+                              {" "}
+                              <Button
+                                className="btn btn-sm action_btn yellow-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditTranslation(trans); // prevent accordion toggle
+                                }}
+                              >
+                                <FaEdit />
+                              </Button>
+                              <Button
+                                className="btn btn-sm action_btn red-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation(); // prevent accordion toggle
+                                  handleDeleteTranslation(trans);
+                                }}
+                              >
+                                <FaTrash />
+                              </Button>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {row.translations.map((trans, key) => (
-                            <tr key={key}>
-                              <td>{trans.lang_code}</td>
-                              <td>{trans.facility_name}</td>
-                              <td>{trans.facility_desc}</td>
-                              <td>
-                                {" "}
-                                <Button
-                                  className="btn btn-sm action_btn yellow-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditTranslation(trans); // prevent accordion toggle
-                                  }}
-                                >
-                                  <FaEdit />
-                                </Button>
-                                <Button
-                                  className="btn btn-sm action_btn red-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // prevent accordion toggle
-                                    handleDeleteTranslation(trans);
-                                  }}
-                                >
-                                  <FaTrash />
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    ) : (
-                      <div className="centerSection">
-                        <p>No data</p>
-                      </div>
-                    )}
-                  </Accordion.Body>
-                </Accordion.Item>
-              </Accordion>
-            ))}
+                        ))}
+                      </tbody>
+                    </Table>
+                  ) : (
+                    <div className="centerSection">
+                      <p>No data</p>
+                    </div>
+                  )}
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          ))}
       </div>
       {loading ? <LoadingPage /> : null}
       <PopUp

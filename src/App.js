@@ -58,8 +58,11 @@ export default function App() {
             <Route path="/facility" element={<Facility />} />
             <Route path="/Booking" element={<BookingGrid />} />
             <Route path="/exchange-rates" element={<ExchangeRates />} />
-            <Route path="/transfer" element={<CategorySetting />} /> 
-            <Route path="/transfer/images" element={<TransferCategoryImages />} />
+            <Route path="/transfer" element={<CategorySetting />} />
+            <Route
+              path="/transfer/images"
+              element={<TransferCategoryImages />}
+            />
             <Route path="/users" element={<UsersPage />} />
           </Route>
         </Route>

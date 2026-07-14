@@ -1,3 +1,16 @@
+/**
+ * ExchangeRates Component
+ *
+ * Manages daily currency exchange rates.
+ *
+ * Features:
+ * - Load company base currency
+ * - View exchange rates for a selected date
+ * - Edit today's or future exchange rates
+ * - Prevent editing historical rates
+ * - Save updated exchange rates
+ * - Display loading and save status
+ */
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -11,31 +24,46 @@ import "./ExchangeRates.scss";
 
 function ExchangeRates() {
   const dispatch = useDispatch();
-  const {
-    rates,
-    loading,
-    saving,
-    error,
-    saveResult,
-    companyCurrencyCode,
-  } = useSelector((state) => state.exchange);
-
+  const { rates, loading, saving, error, saveResult, companyCurrencyCode } =
+    useSelector((state) => state.exchange);
+  // Today's date formatted as YYYY-MM-DD.
+  // useMemo prevents recreating the value on every render.
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // Currently selected date for exchange rates
   const [selectedDate, setSelectedDate] = useState(today);
+
+  // Success or error message displayed to the user
   const [message, setMessage] = useState(null);
-
+  // Indicates whether the selected date is today or in the future.
+  // Past dates are read-only.
   const isNotPastDate = selectedDate >= today;
-
+  /**
+   * Loads company settings when the component
+   * is first rendered.
+   *
+   * Company settings include the base currency
+   * used for exchange rate calculations.
+   */
   useEffect(() => {
     dispatch(GetCompanySetting(1));
   }, [dispatch]);
 
+  /**
+   * Reloads exchange rates whenever
+   * the selected date changes.
+   *
+   * Also clears any previous success
+   * or error messages.
+   */
   useEffect(() => {
     setMessage(null);
     dispatch(clearExchangeMessage());
     dispatch(GetExchangeRates(selectedDate));
   }, [dispatch, selectedDate]);
-
+  /**
+   * Updates the displayed message whenever
+   * an error or save result changes.
+   */
   useEffect(() => {
     if (error) {
       setMessage(error);
@@ -44,22 +72,42 @@ function ExchangeRates() {
     }
   }, [error, saveResult]);
 
+  /**
+   * Updates the exchange rate for a currency.
+   *
+   * Editing is only allowed for today's
+   * or future exchange rates.
+   *
+   * @param {string} currency_code Currency code.
+   * @param {number|string} value New exchange rate.
+   */
   const handleRateChange = (currency_code, value) => {
     if (!isNotPastDate) return;
     dispatch(updateRate({ currency_code, rate: value }));
   };
-
+  /**
+   * Saves all exchange rates for
+   * the selected date.
+   *
+   * On successful save:
+   * - Refresh exchange rates
+   * - Display success message
+   *
+   * Historical rates cannot be modified.
+   */
   const handleSave = async () => {
     if (!isNotPastDate) return;
     setMessage(null);
     dispatch(clearExchangeMessage());
-    
+
     const resultAction = await dispatch(
       SaveExchangeRate({ rates, date: selectedDate }),
     );
 
     if (SaveExchangeRate.fulfilled.match(resultAction)) {
       // Small delay to ensure backend processing is complete
+      // Reload exchange rates after saving to ensure
+      // the latest values are displayed.
       setTimeout(() => {
         dispatch(GetExchangeRates(selectedDate));
       }, 300);
@@ -137,7 +185,10 @@ function ExchangeRates() {
                             step="0.000001"
                             value={item.rate}
                             onChange={(e) =>
-                              handleRateChange(item.currency_code, e.target.value)
+                              handleRateChange(
+                                item.currency_code,
+                                e.target.value,
+                              )
                             }
                           />
                         ) : (
