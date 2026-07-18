@@ -53,7 +53,7 @@ export const ConfirmOTP = createAsyncThunk(
         //return error.response.data;
       });
     return response;
-  }
+  },
 );
 ///normal register && gmail Register (different on API path & payload)
 export const RegisterUser = createAsyncThunk(
@@ -71,7 +71,7 @@ export const RegisterUser = createAsyncThunk(
         // return error.response.data;
       });
     return response;
-  }
+  },
 );
 
 //normal login & gmail Login (different on API path & payload)
@@ -90,7 +90,7 @@ export const LoginUser = createAsyncThunk(
         //return error.response.data;
       });
     return response;
-  }
+  },
 );
 const authSlice = createSlice({
   name: "auth",
@@ -106,23 +106,25 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     //start register
     builder
+      .addCase(RegisterUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = null;
+        state.message = null;
+      })
+      .addCase(LoginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = null;
+        state.message = null;
+      })
+      .addCase(ConfirmOTP.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = null;
+        state.message = null;
+      })
       .addCase(RegisterUser.fulfilled, (state, action) => {
-        // if (action.payload.status != null && action.payload.status != 200) {
-        //   state.user = null;
-        //   // state.status = "failed";
-        //   state.success = false;
-        //   state.loading = false;
-        //   state.error = JSON.stringify(action.payload.error);
-        // } else {
-        //   state.user = action.payload?.user;
-        //   //state.status = "succeeded";
-        //   state.loading = false;
-        //   state.success = action.payload.isSuccessed;
-        //   localStorage.setItem("token", action.payload?.user?.accessToken);
-        //   localStorage.setItem("user", JSON.stringify(action.payload?.user));
-        //   //state.error = action.payload !== null ? action.payload.msg : "";
-        //   state.message = action.payload?.message;
-        // }
         state.user = action.payload?.user;
         state.loading = false;
         state.success = action.payload.isSuccessed;
@@ -162,23 +164,42 @@ const authSlice = createSlice({
         localStorage.setItem("user", JSON.stringify(action.payload?.user));
         state.message = action.payload?.message;
       })
-      .addMatcher(
-        (action) => action.type.endsWith("/pending"),
-        (state) => {
-          //state.status = "loading";
-          state.loading = true;
-        }
-      )
-      .addMatcher(
-        (action) => action.type.endsWith("/rejected"),
-        (state, action) => {
-          //state.status = "failed";
-          state.error = action.payload;
-          state.message = action.payload;
-          state.success = false;
-          state.loading = false;
-        }
-      );
+      .addCase(RegisterUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+        state.message = action.payload;
+      })
+      .addCase(LoginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+        state.message = action.payload;
+      })
+      .addCase(ConfirmOTP.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.success = false;
+        state.message = action.payload;
+        state.isGoogleAcc = false;
+      });
+    // .addMatcher(
+    //   (action) => action.type.endsWith("/pending"),
+    //   (state) => {
+    //     //state.status = "loading";
+    //     state.loading = true;
+    //   }
+    // )
+    // .addMatcher(
+    //   (action) => action.type.endsWith("/rejected"),
+    //   (state, action) => {
+    //     //state.status = "failed";
+    //     state.error = action.payload;
+    //     state.message = action.payload;
+    //     state.success = false;
+    //     state.loading = false;
+    //   }
+    // );
   },
 });
 

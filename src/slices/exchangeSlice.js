@@ -32,6 +32,7 @@ export const SaveExchangeRate = createAsyncThunk(
       const payload = rates.map((item) => ({
         id: item.id,
         currency_id: item.currency_id,
+        currency_code: item.currency_code,
         effective_date: item.effective_date || date,
         rate: Number(item.rate),
         created_at: item.created_at || new Date().toISOString(),
@@ -128,11 +129,15 @@ const exchangeSlice = createSlice({
       })
       .addCase(GetCompanySetting.pending, (state) => {
         state.error = null;
+        state.loading = true;
       })
       .addCase(GetCompanySetting.fulfilled, (state, action) => {
+        state.loading = false;
         state.companyCurrencyCode = action.payload?.currency_code || "EUR";
+        console.log("full ", state.loading);
       })
       .addCase(GetCompanySetting.rejected, (state, action) => {
+        state.loading = false;
         state.error =
           action.payload?.msg ||
           action.payload ||

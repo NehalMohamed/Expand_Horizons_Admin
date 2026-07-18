@@ -2,6 +2,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import "./styles/shared.scss";
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 // src/App.js
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login/Login";
@@ -26,12 +27,15 @@ import NavigationSetter from "./helper/NavigationSetter";
 import BookingGrid from "./components/Booking/BookingGrid";
 import UsersPage from "./components/Users/UsersPage";
 import ExchangeRates from "./components/GlobalSetting/ExchangeRates";
+import { GetCompanySetting } from "./slices/exchangeSlice";
 export default function App() {
+  const dispatch = useDispatch();
   // const navigate = useNavigate();
 
   // useEffect(() => {
-  //   setNavigator(navigate);
-  // }, [navigate]);
+  useEffect(() => {
+    dispatch(GetCompanySetting(1));
+  }, []);
   return (
     <Router>
       <NavigationSetter />

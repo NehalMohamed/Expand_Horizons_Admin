@@ -63,7 +63,7 @@ function ChildPolicy({
   setShowPopup,
 }) {
   const dispatch = useDispatch();
-
+  const { companyCurrencyCode } = useSelector((state) => state.exchange);
   // Indicates whether the form is in Add or Update mode
   const [isUpdate, setIsUpdate] = useState(0);
 
@@ -73,7 +73,7 @@ function ChildPolicy({
     trip_id: trip_id,
     code_auto: "",
     age_from: 0,
-    currency_code: "",
+    currency_code: companyCurrencyCode || "EUR",
     delete: false,
     age_to: 0,
     notes: "",
@@ -132,6 +132,7 @@ function ChildPolicy({
     e.preventDefault();
 
     formData["trip_id"] = trip_id;
+    formData["currency_code"] = companyCurrencyCode || "EUR";
 
     dispatch(SaveTripChildPolicy(formData)).then((result) => {
       if (result.payload && result.payload.success) {
@@ -152,7 +153,7 @@ function ChildPolicy({
         trip_id: trip_id,
         code_auto: "",
         age_from: 0,
-        currency_code: "",
+        currency_code: companyCurrencyCode || "EUR",
         delete: false,
         age_to: 0,
         notes: "",
@@ -171,7 +172,7 @@ function ChildPolicy({
       trip_id: trip_id,
       code_auto: "",
       age_from: 0,
-      currency_code: "",
+      currency_code: companyCurrencyCode || "EUR",
       delete: false,
       age_to: 0,
       notes: "",
@@ -282,6 +283,11 @@ function ChildPolicy({
               <Form.Group controlId="curr_code">
                 <Form.Label>Currency</Form.Label>
                 <Form.Control
+                  type="text"
+                  value={companyCurrencyCode || formData.currency_code}
+                  readOnly
+                />
+                {/* <Form.Control
                   as="select"
                   name="currency_code"
                   value={formData.currency_code}
@@ -290,8 +296,8 @@ function ChildPolicy({
                   disabled={formData.pricing_type == 1}
                 >
                   <option value={""}>select Currency</option>
-                  <CurrencySelect />
-                </Form.Control>
+                  <CurrencySelect /> */}
+                {/* </Form.Control> */}
               </Form.Group>
             </Col>
 

@@ -124,6 +124,7 @@ function Login() {
       [e.target.name]: e.target.value,
     }));
   };
+  console.log("loading ", loading);
   return (
     <section className="centerSection">
       <div className="login_page">

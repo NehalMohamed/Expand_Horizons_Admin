@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   GetExchangeRates,
   SaveExchangeRate,
-  GetCompanySetting,
+  //GetCompanySetting,
   updateRate,
   clearExchangeMessage,
 } from "../../slices/exchangeSlice";
@@ -44,9 +44,9 @@ function ExchangeRates() {
    * Company settings include the base currency
    * used for exchange rate calculations.
    */
-  useEffect(() => {
-    dispatch(GetCompanySetting(1));
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(GetCompanySetting(1));
+  // }, [dispatch]);
 
   /**
    * Reloads exchange rates whenever

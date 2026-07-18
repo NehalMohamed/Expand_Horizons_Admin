@@ -53,6 +53,7 @@ const priceTypes = [
 ];
 function TripPrices() {
   const dispatch = useDispatch();
+  const { companyCurrencyCode } = useSelector((state) => state.exchange);
   // Controls visibility of the Add/Edit pricing panel
   const [Expanded, setExpanded] = useState(false);
 
@@ -76,7 +77,7 @@ function TripPrices() {
     trip_id: trip_id,
     trip_origin_price: 0,
     trip_sale_price: 0,
-    currency_code: "",
+    currency_code: companyCurrencyCode || "EUR",
     delete: false,
     child_price: 0,
     notes: "",
@@ -92,6 +93,7 @@ function TripPrices() {
     dispatch(GetTrip_Prices(trip?.id));
     resetForm();
   };
+
   // Retrieve pricing data and loading state from Redux
   const { loading, error, TripPriceList } = useSelector((state) => state.trips);
   const handleInputChange = (e) => {
@@ -132,6 +134,7 @@ function TripPrices() {
   const handleAdd = (e) => {
     e.preventDefault();
     formData["trip_id"] = trip_id;
+    formData["currency_code"] = companyCurrencyCode || "EUR";
     dispatch(SaveTripPrices(formData)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
@@ -147,7 +150,7 @@ function TripPrices() {
         trip_id: 0,
         trip_origin_price: 0,
         trip_sale_price: 0,
-        currency_code: "",
+        currency_code: companyCurrencyCode || "EUR",
         delete: false,
         child_price: 0,
         notes: "",
@@ -165,7 +168,7 @@ function TripPrices() {
       trip_id: 0,
       trip_origin_price: 0,
       trip_sale_price: 0,
-      currency_code: "",
+      currency_code: companyCurrencyCode || "EUR",
       delete: false,
       child_price: 0,
       notes: "",
@@ -193,6 +196,7 @@ function TripPrices() {
       pricing_type: trip.pricing_type,
     });
   };
+  //console.log("companyCurrencyCode ", companyCurrencyCode);
   return (
     <section className="layout_section">
       <div className="d-flex justify-content-between align-items-center">
@@ -287,6 +291,11 @@ function TripPrices() {
                     <Form.Group controlId="curr_code">
                       <Form.Label>Currency</Form.Label>
                       <Form.Control
+                        type="text"
+                        value={companyCurrencyCode || formData.currency_code}
+                        readOnly
+                      />
+                      {/* <Form.Control
                         as="select"
                         name="currency_code"
                         value={formData.currency_code}
@@ -294,13 +303,8 @@ function TripPrices() {
                         required
                       >
                         <option value={""}>select Currency</option>
-                        <CurrencySelect />
-                        {/* {currencies.map((currency, index) => (
-                          <option key={index} value={currency.code}>
-                            {currency.code}
-                          </option>
-                        ))} */}
-                      </Form.Control>
+                        <CurrencySelect /> */}
+                      {/* </Form.Control> */}
                     </Form.Group>
                   </Col>
                   <Col md={2}>
