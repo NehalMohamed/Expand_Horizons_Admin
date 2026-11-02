@@ -24,7 +24,7 @@ import {
   GetTrip_Mains,
   SaveMainTrip,
   GetTripCategories,
-  GetTransfer_Categories,
+  GetTripTypes,
 } from "../../slices/tripSlice";
 import { GetDestination_Mains } from "../../slices/destinationSlice";
 import {
@@ -102,7 +102,7 @@ function TripComp() {
     show_in_slider: false,
     destination_id: 0,
     route: "",
-    trip_type: 0,
+    trip_category: 0,
     transfer_category_id: 0,
     release_days: 1,
     trip_order: 0,
@@ -116,14 +116,16 @@ function TripComp() {
   const isValidSlug =
     formData.route?.length === 0 || slugRegex.test(formData.route);
   // Get trip data and lookup lists from Redux store
-  const { TripsMain, loading, error, TripCategories, TransferCategories } =
-    useSelector((state) => state.trips);
+  const { TripsMain, loading, error, TripCategories, TripTypes } = useSelector(
+    (state) => state.trips,
+  );
   const { DestinationMain } = useSelector((state) => state.destinations);
 
   useEffect(() => {
     dispatch(GetTripCategories());
-    dispatch(GetDestination_Mains(true));
-    let data = { destination_id: destination_id, trip_type: 0 };
+    dispatch(GetTripTypes());
+    dispatch(GetDestination_Mains(false));
+    let data = { destination_id: destination_id, trip_category: 0 };
     dispatch(GetTrip_Mains(data));
     return () => {};
   }, [dispatch]);
@@ -147,6 +149,7 @@ function TripComp() {
       show_in_slider: false,
       destination_id: 0,
       route: "",
+      trip_cat: 0,
       trip_type: 0,
       transfer_category_id: 0,
       release_days: 1,
@@ -173,6 +176,7 @@ function TripComp() {
             show_in_slider: false,
             destination_id: 0,
             route: "",
+            trip_cat: 0,
             trip_type: 0,
             transfer_category_id: 0,
             release_days: 1,
@@ -181,7 +185,7 @@ function TripComp() {
             trip_code_auto: "",
           });
           setIsUpdate(false);
-          let data = { destination_id: 0, trip_type: 0 };
+          let data = { destination_id: 0, trip_category: 0 };
           dispatch(GetTrip_Mains(data));
         } else {
           setShowPopup(true);
@@ -205,6 +209,7 @@ function TripComp() {
       destination_id: trip.destination_id,
       route: trip.route,
       trip_type: trip.trip_type,
+      trip_cat: trip.trip_cat,
       transfer_category_id: trip.transfer_category_id,
       release_days: trip.release_days,
       trip_order: trip.trip_order,
@@ -225,6 +230,7 @@ function TripComp() {
       destination_id: trip.destination_id,
       route: trip.route,
       trip_type: trip.trip_type,
+      trip_cat: trip.trip_cat,
       transfer_category_id: trip.transfer_category_id,
       release_days: trip.release_days,
       trip_order: trip.trip_order,
@@ -234,7 +240,7 @@ function TripComp() {
     dispatch(SaveMainTrip(data)).then((result) => {
       if (result.payload && result.payload.success) {
         setShowPopup(false);
-        let data = { destination_id: 0, trip_type: 0 };
+        let data = { destination_id: 0, trip_category: 0 };
         dispatch(GetTrip_Mains(data));
       } else {
         setShowPopup(true);
@@ -339,9 +345,9 @@ function TripComp() {
                 <Form.Label>Trip Category</Form.Label>
                 <Form.Control
                   as="select"
-                  name="trip_type"
+                  name="trip_cat"
                   onChange={handleInputChange}
-                  value={formData.trip_type}
+                  value={formData.trip_cat}
                   required
                   className="formInput"
                 >
@@ -349,7 +355,7 @@ function TripComp() {
                   {TripCategories &&
                     TripCategories?.map((cat, index) => (
                       <option key={index} value={cat.id}>
-                        {cat.type_code} - {cat.type_name}
+                        {cat.category_code} - {cat.category_name}
                       </option>
                     ))}
                 </Form.Control>
@@ -417,6 +423,30 @@ function TripComp() {
               </Form.Group>
             </Col>
             <Col md={3}>
+              {" "}
+              <Form.Group>
+                <Form.Label>Trip Type</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="trip_type"
+                  onChange={handleInputChange}
+                  value={formData.trip_type}
+                  required
+                  className="formInput"
+                >
+                  <option value="">select type</option>
+                  {TripTypes &&
+                    TripTypes?.map((typ, index) => (
+                      <option key={index} value={typ.id}>
+                        {typ.type_code} - {typ.type_name}
+                      </option>
+                    ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={3}>
               <Form.Group>
                 <Form.Label>release days</Form.Label>
                 <Form.Control
@@ -429,10 +459,7 @@ function TripComp() {
                 ></Form.Control>
               </Form.Group>
             </Col>
-          </Row>
-          <Row>
-            {" "}
-            <Col md={2} xs={12}>
+            <Col md={3} xs={12}>
               <Form.Label>Order</Form.Label>
               <Form.Group className="mb-3">
                 <Form.Control
@@ -552,7 +579,7 @@ function TripComp() {
                   Category
                   <Form.Control
                     as="select"
-                    name="trip_type"
+                    name="trip_category"
                     onChange={(e) => setSearchCategory(e.target.value)}
                     value={SearchCategory}
                     required
@@ -562,11 +589,12 @@ function TripComp() {
                     {TripCategories &&
                       TripCategories?.map((cat, index) => (
                         <option key={index} value={cat.id}>
-                          {cat.type_name}
+                          {cat.category_name}
                         </option>
                       ))}
                   </Form.Control>
                 </th>
+                <th>Type</th>
                 <th>Release Days</th>
                 <th>Order</th>
                 <th></th>
@@ -578,7 +606,7 @@ function TripComp() {
                   item.trip_default_name
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) &&
-                  item.trip_type
+                  item.trip_cat
                     ?.toString()
                     .includes(SearchCategory?.toString()),
               ).map((trip, index) => (
@@ -615,10 +643,17 @@ function TripComp() {
                   <td>{trip.route}</td>
                   <td>
                     {
-                      TripCategories.filter((f) => f.id == trip.trip_type)[0]
+                      TripCategories.filter((f) => f.id == trip.trip_cat)[0]
+                        ?.category_name
+                    }
+                  </td>
+                  <td>
+                    {
+                      TripTypes.filter((f) => f.id == trip.trip_type)[0]
                         ?.type_name
                     }
                   </td>
+
                   <td>{trip.release_days}</td>
                   <td>{trip.trip_order}</td>
 

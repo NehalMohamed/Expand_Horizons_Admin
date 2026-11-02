@@ -83,6 +83,14 @@ export const SubMenuItems = [
     roles: ["Admin", "manager"],
   },
   {
+    id: "destinationsCategories",
+    parentId: "destinations",
+    title: "Categories & Types",
+    icon: "MdCategory",
+    path: "/destinations/categories-types",
+    roles: ["Admin", "manager"],
+  },
+  {
     id: "tripsImgs",
     parentId: "trips",
     title: "Images",

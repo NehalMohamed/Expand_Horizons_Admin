@@ -33,14 +33,14 @@ export const GetDestination_Mains = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/TravelAdmin/GetDestinationMain?leaf=` + leaf
+        `/TravelAdmin/GetDestinationMain?leaf=` + leaf,
         //getAuthHeaders(false)
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 //Get Destination list with its translations
 export const GetDestinations = createAsyncThunk(
@@ -54,14 +54,14 @@ export const GetDestinations = createAsyncThunk(
       // );
       const response = await api.post(
         `/TravelAdmin/GetDestinationWithTranslations`,
-        formData
+        formData,
         // getAuthHeaders(false)
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //save main Destination
@@ -76,14 +76,14 @@ export const SaveMainDestination = createAsyncThunk(
       // );
       const response = await api.post(
         `/TravelAdmin/SaveMainDestination`,
-        formData
+        formData,
         //getAuthHeaders(false)
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //save main Destination
@@ -99,14 +99,14 @@ export const saveDestinationImage = createAsyncThunk(
       const response = await api.post(
         `/TravelAdmin/saveDestinationImage`,
         formData,
-        { isFormData: true }
+        { isFormData: true },
         //getAuthHeaders(true)
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 //save  Destination translations
 export const SaveDestinationTranslations = createAsyncThunk(
@@ -120,14 +120,14 @@ export const SaveDestinationTranslations = createAsyncThunk(
       // );
       const response = await api.post(
         `/TravelAdmin/SaveDestinationTranslations`,
-        formData
+        formData,
         //getAuthHeaders(false)
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const GetImgsByDestination = createAsyncThunk(
   "destinations/GetImgsByDestination",
@@ -139,7 +139,7 @@ export const GetImgsByDestination = createAsyncThunk(
       //   getAuthHeaders(false)
       // );
       const response = await api.post(
-        `/TravelAdmin/GetImgsByDestination?destination_id=` + destination_id
+        `/TravelAdmin/GetImgsByDestination?destination_id=` + destination_id,
         // {},
         // getAuthHeaders(false)
       );
@@ -147,7 +147,7 @@ export const GetImgsByDestination = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 //save  Destination translations
@@ -162,14 +162,51 @@ export const UpdateDestinationImage = createAsyncThunk(
       // );
       const response = await api.post(
         `/TravelAdmin/UpdateDestinationImage`,
-        formData
+        formData,
         //getAuthHeaders(false)
       );
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
-  }
+  },
+);
+
+//get Types Assign to destinations
+export const GetTripTypesByDestination = createAsyncThunk(
+  "destinations/GetTripTypesByDestination",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/TravelAdmin/GetTripTypesByDestination?destinationId=` +
+          data.destinationId +
+          "&CategoryId=" +
+          data.CategoryId,
+        // {},
+        // getAuthHeaders(false)
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+//save  Destination Types
+export const SaveDestinationTypes = createAsyncThunk(
+  "destinations/SaveDestinationTypes",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/TravelAdmin/SaveDestinationTypes`,
+        formData,
+        //getAuthHeaders(false)
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  },
 );
 const destinationSlice = createSlice({
   name: "destinations",
@@ -179,8 +216,12 @@ const destinationSlice = createSlice({
     error: null,
     DestinationImages: [],
     DestinationMain: [],
+    DestTripTypes: [],
   },
   reducers: {
+    clearDestinationTypes: (state) => {
+      state.DestTripTypes = [];
+    },
     setDestinations: (state, action) => {
       state.destinations = action.payload;
     },
@@ -265,7 +306,31 @@ const destinationSlice = createSlice({
       .addCase(UpdateDestinationImage.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(GetTripTypesByDestination.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(GetTripTypesByDestination.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.DestTripTypes = action.payload;
+      })
+      .addCase(GetTripTypesByDestination.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(SaveDestinationTypes.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(SaveDestinationTypes.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(SaveDestinationTypes.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
+
     // .addMatcher(
     //   (action) => action.type.endsWith("/pending"),
     //   (state) => {
@@ -283,5 +348,6 @@ const destinationSlice = createSlice({
   },
 });
 
-export const { setDestinations } = destinationSlice.actions;
+export const { setDestinations, clearDestinationTypes } =
+  destinationSlice.actions;
 export default destinationSlice.reducer;

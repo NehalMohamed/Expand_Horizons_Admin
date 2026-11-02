@@ -30,7 +30,14 @@ import * as FiIcons from "react-icons/fi";
 import * as FaIcons from "react-icons/fa";
 import * as IO5Icons from "react-icons/io5";
 import * as Fa6Icons from "react-icons/fa6";
-const allIcons = { ...FaIcons, ...IO5Icons, ...FiIcons, ...Fa6Icons };
+import * as MD6Icons from "react-icons/md";
+const allIcons = {
+  ...FaIcons,
+  ...IO5Icons,
+  ...FiIcons,
+  ...Fa6Icons,
+  ...MD6Icons,
+};
 export default function SideMenu({ ChangeLayoutWidth }) {
   const navigate = useNavigate();
   // Stores menu items available for the logged-in user.

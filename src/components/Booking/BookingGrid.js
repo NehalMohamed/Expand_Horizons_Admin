@@ -71,7 +71,7 @@ function BookingGrid() {
    */
   useEffect(() => {
     dispatch(GetAllBooking(formData));
-    let data = { destination_id: 0, trip_type: 0 };
+    let data = { destination_id: 0, trip_category: 0 };
     dispatch(GetTrip_Mains(data));
     return () => {};
   }, []);

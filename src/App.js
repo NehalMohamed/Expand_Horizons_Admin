@@ -28,6 +28,7 @@ import BookingGrid from "./components/Booking/BookingGrid";
 import UsersPage from "./components/Users/UsersPage";
 import ExchangeRates from "./components/GlobalSetting/ExchangeRates";
 import { GetCompanySetting } from "./slices/exchangeSlice";
+import CategoriesConfiguration from "./components/Destinations/CategoriesConfiguration";
 export default function App() {
   const dispatch = useDispatch();
   // const navigate = useNavigate();
@@ -52,6 +53,10 @@ export default function App() {
             <Route
               path="/destinations/images"
               element={<DestinationImages />}
+            />
+            <Route
+              path="/destinations/categories-types"
+              element={<CategoriesConfiguration />}
             />
             <Route path="/trips" element={<Trips />} />
             <Route path="/trips/translation" element={<TripTranslation />} />

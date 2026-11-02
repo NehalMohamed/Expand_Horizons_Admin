@@ -19,7 +19,7 @@ export const GetTrip_Mains = createAsyncThunk(
         `/TravelAdmin/GetTrip_Mains?destination_id=` +
           data.destination_id +
           "&&trip_type=" +
-          data.trip_type,
+          data.trip_category,
         // {},
         // getAuthHeaders(false)
       );
@@ -43,6 +43,23 @@ export const GetTripCategories = createAsyncThunk(
       // );
       const response = await api.post(
         `/TravelAdmin/GetTripCategories`,
+        // {},
+        // getAuthHeaders(false)
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  },
+);
+
+//Get  trip categories list
+export const GetTripTypes = createAsyncThunk(
+  "trips/GetTripTypes",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/TravelAdmin/GetTripTypes`,
         // {},
         // getAuthHeaders(false)
       );
@@ -384,6 +401,7 @@ const tripSlice = createSlice({
     TripCategories: [],
     TransferCategories: [],
     ChildPolicyList: [],
+    TripTypes: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -560,7 +578,20 @@ const tripSlice = createSlice({
       .addCase(GetTrip_ChildPolicy.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(GetTripTypes.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(GetTripTypes.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.TripTypes = action.payload;
+      })
+      .addCase(GetTripTypes.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
+
     // .addMatcher(
     //   (action) => action.type.endsWith("/pending"),
     //   (state) => {
